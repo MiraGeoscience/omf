@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from .base import Project
+from omf.fileio.geoh5 import GeoH5Writer
 from .data import (ColorArray, ColorData,
                    DateTimeArray, DateTimeColormap, DateTimeData,
                    Int2Array, Int3Array,
@@ -19,7 +20,7 @@ from .surface import SurfaceGeometry, SurfaceGridGeometry, SurfaceElement
 from .texture import ImageTexture
 from .volume import VolumeGridGeometry, VolumeElement
 
-from .fileio import OMFReader, OMFWriter
+from omf.fileio.fileio import OMFReader, OMFWriter
 
 __version__ = '1.0.0'
 __author__ = 'Global Mining Guidelines Group'
