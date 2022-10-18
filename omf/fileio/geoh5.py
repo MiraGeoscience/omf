@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
 import numpy as np
-from geoh5py.data import Data
+from geoh5py.data import Data, FloatData
 from geoh5py.groups import RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, Points, Surface
 from geoh5py.shared import Entity
@@ -59,8 +60,32 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
                 f"Element of type {type(element)} currently not implemented."
             )
 
-        converter: BaseConversion = _CONVERSION_MAP[type(element)](element, self.file)
+        converter = _CONVERSION_MAP[type(element)](element, self.file)
         self._entity = converter.from_omf()
+
+
+class GeoH5Reader:  # pylint: disable=too-few-public-methods
+    """
+    Geoh5 to omf class converter
+    """
+
+    def __init__(self, entity: UidModel):
+        self.file = entity.workspace
+        self.element = entity
+
+    @property
+    def element(self):
+        return self._element
+
+    @element.setter
+    def element(self, entity):
+        if type(entity) not in _CONVERSION_MAP:
+            raise OMFtoGeoh5NotImplemented(
+                f"Element of type {type(entity)} currently not implemented."
+            )
+
+        converter = _CONVERSION_MAP[type(entity)](entity, self.file)
+        self._element = converter.from_geoh5()
 
 
 class BaseConversion(ABC):
@@ -73,7 +98,6 @@ class BaseConversion(ABC):
     omf_type: type[UidModel] = UidModel
     _attribute_map: dict = {
         "uid": "uid",
-        "description": "description",
         "name": "name",
     }
     _element = None
@@ -91,7 +115,7 @@ class BaseConversion(ABC):
 
         self.geoh5 = geoh5
 
-    def collect_attributes(self, **kwargs):
+    def collect_omf_attributes(self, **kwargs):
         with fetch_h5_handle(self.geoh5) as workspace:
             for key, alias in self._attribute_map.items():
                 prop = getattr(self.element, key, None)
@@ -106,6 +130,22 @@ class BaseConversion(ABC):
 
                 else:
                     kwargs[alias] = prop
+
+        return kwargs
+
+    def collect_h5_attributes(self, **kwargs):
+        with fetch_h5_handle(self.geoh5) as workspace:
+            for key, alias in self._attribute_map.items():
+
+                if isinstance(alias, type(BaseConversion)):
+                    prop = alias(  # pylint: disable=not-callable
+                        self.entity, workspace
+                    ).from_geoh5()
+                else:
+                    prop = getattr(self.entity, alias, None)
+
+                if prop is not None:
+                    kwargs[key] = prop
 
         return kwargs
 
@@ -133,13 +173,11 @@ class BaseConversion(ABC):
             raise ValueError(f"Input 'entity' must be of type {self.omf_type}")
         self._entity = value
 
-    @abstractmethod
     def from_omf(self, **kwargs) -> Entity | None:
         """Convert omf element to geoh5 entity."""
 
-    @abstractmethod
     def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
+        """Convert geoh5 entity to omf element."""
 
 
 class DataConversion(BaseConversion):
@@ -150,7 +188,7 @@ class DataConversion(BaseConversion):
 
     omf_type = ScalarData
     geoh5_type = Data
-    _attribute_map = {
+    _attribute_map: dict[str, Any] = {
         "uid": "uid",
         "name": "name",
         "array": "values",
@@ -159,7 +197,7 @@ class DataConversion(BaseConversion):
 
     def from_omf(self, parent=None, **kwargs) -> Data:
         with fetch_h5_handle(self.geoh5):
-            kwargs = self.collect_attributes(**kwargs)
+            kwargs = self.collect_omf_attributes(**kwargs)
 
             if self.element.location in ["faces", "cells", "segments"]:
                 kwargs["association"] = "CELL"
@@ -170,9 +208,22 @@ class DataConversion(BaseConversion):
 
         return self._entity
 
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
+    def from_geoh5(self, **kwargs) -> UidModel:
+        """Convert a geoh5 data to omf element."""
+        with fetch_h5_handle(self.geoh5):
+            kwargs = self.collect_h5_attributes(**kwargs)
+            uid = kwargs.get("uid")
+            del kwargs["uid"]
+
+            if self.entity.association.name == "VERTEX":
+                kwargs["location"] = "vertices"
+            else:
+                kwargs["location"] = _ASSOCIATION_MAP[type(self.entity.parent)]
+
+            self._element = self.omf_type(**kwargs)
+            self._element._backend.update({"uid": uid})  # pylint: disable=W0212
+
+        return self._element
 
 
 class ElementConversion(BaseConversion):
@@ -181,8 +232,7 @@ class ElementConversion(BaseConversion):
     :obj:`geoh5py.objects.Points`
     """
 
-    _attribute_map = {
-        "description": "description",
+    _attribute_map: dict[str, Any] = {
         "name": "name",
         "uid": "uid",
         "geometry": None,
@@ -190,13 +240,15 @@ class ElementConversion(BaseConversion):
 
     def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace):
         super().__init__(obj, geoh5)
-        self.geoh5_type = _CLASS_MAP[type(self.element.geometry)]
+
+        if isinstance(obj, UidModel):
+            self.geoh5_type = _CLASS_MAP[type(self.element.geometry)]
 
     def from_omf(self, **kwargs) -> Entity | None:
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
             try:
-                kwargs = self.collect_attributes(**kwargs)
+                kwargs = self.collect_omf_attributes(**kwargs)
             except OMFtoGeoh5NotImplemented as error:
                 warnings.warn(error.args[0])
                 return None
@@ -204,29 +256,49 @@ class ElementConversion(BaseConversion):
             self._entity = workspace.create_entity(
                 self.geoh5_type, **{"entity": kwargs}
             )
-            self.process_dependents(workspace)
+            self.process_dependents(self.element, workspace)
 
         return self._entity
 
-    def process_dependents(self, workspace):
-        if getattr(self.element, "data", None):
-            for child in self.element.data:
+    def from_geoh5(self, **kwargs) -> UidModel:
+        """Convert a geoh5 entity to omf element."""
+        with fetch_h5_handle(self.geoh5) as workspace:
+            kwargs = self.collect_h5_attributes(**kwargs)
+            uid = kwargs.get("uid")
+            del kwargs["uid"]
+            self._element = self.omf_type(**kwargs)
+            self._element._backend.update({"uid": uid})  # pylint: disable=W0212
+            self.process_dependents(self.entity, workspace)
+
+        return self._element
+
+    def process_dependents(self, parent: UidModel | Entity, workspace):
+        if isinstance(parent, UidModel) and getattr(parent, "data", None):
+            for child in parent.data:
                 converter = _CONVERSION_MAP[type(child)](child, workspace)
                 converter.from_omf(parent=self.entity)
 
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
+        elif isinstance(parent, Entity) and getattr(parent, "children", None):
+            data = []
+            for child in parent.children:
+                converter = _CONVERSION_MAP[type(child)](child, workspace)
+                data += [converter.from_geoh5()]
+
+            self.element.data = data
 
 
 class GeometryConversion(BaseConversion):
     def from_omf(self, **kwargs) -> dict:
-        kwargs = self.collect_attributes(**kwargs)
+        """Generate a dictionary of arguments from omf element."""
+        kwargs = self.collect_omf_attributes(**kwargs)
         return kwargs
 
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
+    def from_geoh5(self, **kwargs) -> UidModel:
+        """Generate an omf element from geoh5 attributes."""
+        with fetch_h5_handle(self.geoh5):
+            kwargs = self.collect_h5_attributes(**kwargs)
+
+        return self.omf_type(**kwargs)
 
 
 class ProjectConversion(BaseConversion):
@@ -240,7 +312,7 @@ class ProjectConversion(BaseConversion):
     def from_omf(self, **kwargs) -> Entity:
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_attributes(**kwargs)
+            kwargs = self.collect_omf_attributes(**kwargs)
             self._entity = workspace.root
 
             for key, value in kwargs.items():
@@ -296,46 +368,6 @@ class ArrayConversion(BaseConversion):
         raise NotImplementedError
 
 
-class PointsConversion(ElementConversion):
-    """
-    Conversion between :obj:`omf.pointset.PointSetElement` and
-    :obj:`geoh5py.objects.Points`
-    """
-
-    omf_type = PointSetElement
-    geoh5_type: Points
-
-
-class CurveConversion(ElementConversion):
-    """
-    Conversion between :obj:`omf.lineset.LineSetElement` and
-    :obj:`geoh5py.objects.Curve`
-    """
-
-    omf_type = LineSetElement
-    geoh5_type: Curve
-
-
-class SurfaceConversion(ElementConversion):
-    """
-    Conversion between :obj:`omf.lineset.LineSetElement` and
-    :obj:`geoh5py.objects.Curve`
-    """
-
-    omf_type = SurfaceElement
-    geoh5_type: Surface | Grid2D
-
-
-class VolumeConversion(ElementConversion):
-    """
-    Conversion between :obj:`omf.volume.VolumeElement` and
-    :obj:`geoh5py.objects.BlockModel`
-    """
-
-    omf_type = VolumeElement
-    geoh5_type: BlockModel
-
-
 class PointSetGeometryConversion(GeometryConversion):
     """
     Conversion between :obj:`omf.pointset.PointSetGeometry` and
@@ -343,7 +375,7 @@ class PointSetGeometryConversion(GeometryConversion):
     """
 
     omf_type = PointSetGeometry
-    geoh5_type = None
+    geoh5_type = Points
     _attribute_map: dict = {"vertices": "vertices"}
 
 
@@ -354,7 +386,7 @@ class LineSetGeometryConversion(GeometryConversion):
     """
 
     omf_type = LineSetGeometry
-    geoh5_type = None
+    geoh5_type = Curve
     _attribute_map: dict = {"vertices": "vertices", "segments": "cells"}
 
 
@@ -365,7 +397,7 @@ class SurfaceGeometryConversion(GeometryConversion):
     """
 
     omf_type = SurfaceGeometry
-    geoh5_type = None
+    geoh5_type = Surface
     _attribute_map: dict = {"vertices": "vertices", "triangles": "cells"}
 
 
@@ -376,13 +408,13 @@ class SurfaceGridGeometryConversion(GeometryConversion):
     """
 
     omf_type = SurfaceGridGeometry
-    geoh5_type = None
+    geoh5_type = Grid2D
     _attribute_map: dict = {
         "u": "u",
         "v": "v",
     }
 
-    def collect_attributes(self, **kwargs):
+    def collect_omf_attributes(self, **kwargs):
         """Convert attributes from omf to geoh5."""
         if self.element.axis_v[-1] != 0:
             raise OMFtoGeoh5NotImplemented(
@@ -423,10 +455,10 @@ class VolumeGridGeometryConversion(GeometryConversion):
     """
 
     omf_type = VolumeGridGeometry
-    geoh5_type = None
+    geoh5_type = BlockModel
     _attribute_map: dict = {"u": "u", "v": "v", "w": "z"}
 
-    def collect_attributes(self, **kwargs) -> dict:
+    def collect_omf_attributes(self, **kwargs) -> dict:
 
         if not np.allclose(np.cross(self.element.axis_w, [0, 0, 1]), [0, 0, 0]):
             raise OMFtoGeoh5NotImplemented(
@@ -448,6 +480,48 @@ class VolumeGridGeometryConversion(GeometryConversion):
         kwargs.update({"origin": np.r_[self.element.origin]})
 
         return kwargs
+
+
+class PointsConversion(ElementConversion):
+    """
+    Conversion between :obj:`omf.pointset.PointSetElement` and
+    :obj:`geoh5py.objects.Points`
+    """
+
+    omf_type = PointSetElement
+    geoh5_type: Points
+    _attribute_map = ElementConversion._attribute_map.copy()
+    _attribute_map["geometry"] = PointSetGeometryConversion
+
+
+class CurveConversion(ElementConversion):
+    """
+    Conversion between :obj:`omf.lineset.LineSetElement` and
+    :obj:`geoh5py.objects.Curve`
+    """
+
+    omf_type = LineSetElement
+    geoh5_type: Curve
+
+
+class SurfaceConversion(ElementConversion):
+    """
+    Conversion between :obj:`omf.lineset.LineSetElement` and
+    :obj:`geoh5py.objects.Curve`
+    """
+
+    omf_type = SurfaceElement
+    geoh5_type: Surface | Grid2D
+
+
+class VolumeConversion(ElementConversion):
+    """
+    Conversion between :obj:`omf.volume.VolumeElement` and
+    :obj:`geoh5py.objects.BlockModel`
+    """
+
+    omf_type = VolumeElement
+    geoh5_type: BlockModel
 
 
 @contextmanager
@@ -478,10 +552,27 @@ def fetch_h5_handle(file: str | Workspace | Path, mode: str = "a") -> Workspace:
             h5file.close()
 
 
+_ASSOCIATION_MAP = {
+    Curve: "segments",
+    Surface: "faces",
+    Grid2D: "faces",
+    BlockModel: "cells",
+}
+
+_CLASS_MAP = {
+    PointSetGeometry: Points,
+    LineSetGeometry: Curve,
+    SurfaceGeometry: Surface,
+    SurfaceGridGeometry: Grid2D,
+    VolumeGridGeometry: BlockModel,
+}
+
 _CONVERSION_MAP = {
+    FloatData: DataConversion,
     Int2Array: ArrayConversion,
     LineSetElement: CurveConversion,
     LineSetGeometry: LineSetGeometryConversion,
+    Points: PointsConversion,
     PointSetElement: PointsConversion,
     PointSetGeometry: PointSetGeometryConversion,
     Project: ProjectConversion,
@@ -493,12 +584,4 @@ _CONVERSION_MAP = {
     Vector3Array: ArrayConversion,
     VolumeElement: VolumeConversion,
     VolumeGridGeometry: VolumeGridGeometryConversion,
-}
-
-_CLASS_MAP = {
-    PointSetGeometry: Points,
-    LineSetGeometry: Curve,
-    SurfaceGeometry: Surface,
-    SurfaceGridGeometry: Grid2D,
-    VolumeGridGeometry: BlockModel,
 }
