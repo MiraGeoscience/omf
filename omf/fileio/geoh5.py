@@ -212,8 +212,7 @@ class DataConversion(BaseConversion):
         """Convert a geoh5 data to omf element."""
         with fetch_h5_handle(self.geoh5):
             kwargs = self.collect_h5_attributes(**kwargs)
-            uid = kwargs.get("uid")
-            del kwargs["uid"]
+            uid = kwargs.pop("uid")
 
             if self.entity.association.name == "VERTEX":
                 kwargs["location"] = "vertices"
@@ -264,8 +263,7 @@ class ElementConversion(BaseConversion):
         """Convert a geoh5 entity to omf element."""
         with fetch_h5_handle(self.geoh5) as workspace:
             kwargs = self.collect_h5_attributes(**kwargs)
-            uid = kwargs.get("uid")
-            del kwargs["uid"]
+            uid = kwargs.pop("uid")
             self._element = self.omf_type(**kwargs)
             self._element._backend.update({"uid": uid})  # pylint: disable=W0212
             self.process_dependents(self.entity, workspace)
