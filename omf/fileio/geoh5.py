@@ -69,23 +69,12 @@ class GeoH5Reader:  # pylint: disable=too-few-public-methods
     Geoh5 to omf class converter
     """
 
-    def __init__(self, entity: UidModel):
-        self.file = entity.workspace
-        self.element = entity
+    def __init__(self, file_name: str | Path):
 
-    @property
-    def element(self):
-        return self._element
-
-    @element.setter
-    def element(self, entity):
-        if type(entity) not in _CONVERSION_MAP:
-            raise OMFtoGeoh5NotImplemented(
-                f"Element of type {type(entity)} currently not implemented."
-            )
-
-        converter = _CONVERSION_MAP[type(entity)](entity, self.file)
-        self._element = converter.from_geoh5()
+        with Workspace(file_name, mode="r") as workspace:
+            self.file = workspace
+            converter = ProjectConversion(workspace.root, self.file)
+            self.project = converter.from_geoh5()
 
 
 class BaseConversion(ABC):
@@ -179,6 +168,26 @@ class BaseConversion(ABC):
     def from_geoh5(self) -> UidModel:
         """Convert geoh5 entity to omf element."""
 
+    def process_dependents(self, parent: UidModel | Entity, workspace) -> list:
+        children = []
+        if isinstance(parent, UidModel):
+
+            if getattr(parent, "data", None):
+                for child in parent.data:
+                    converter = _CONVERSION_MAP[type(child)](child, workspace)
+                    children += [converter.from_omf(parent=self.entity)]
+            elif getattr(parent, "elements", None):
+                for child in parent.elements:
+                    converter = _CONVERSION_MAP[type(child)](child, workspace)
+                    children += [converter.from_omf(parent=self.entity)]
+
+        elif isinstance(parent, Entity) and getattr(parent, "children", None):
+            for child in parent.children:
+                converter = _CONVERSION_MAP[type(child)](child, workspace)
+                children += [converter.from_geoh5()]
+
+        return children
+
 
 class DataConversion(BaseConversion):
     """
@@ -266,23 +275,9 @@ class ElementConversion(BaseConversion):
             uid = kwargs.pop("uid")
             self._element = self.omf_type(**kwargs)
             self._element._backend.update({"uid": uid})  # pylint: disable=W0212
-            self.process_dependents(self.entity, workspace)
+            self._element.data = self.process_dependents(self.entity, workspace)
 
         return self._element
-
-    def process_dependents(self, parent: UidModel | Entity, workspace):
-        if isinstance(parent, UidModel) and getattr(parent, "data", None):
-            for child in parent.data:
-                converter = _CONVERSION_MAP[type(child)](child, workspace)
-                converter.from_omf(parent=self.entity)
-
-        elif isinstance(parent, Entity) and getattr(parent, "children", None):
-            data = []
-            for child in parent.children:
-                converter = _CONVERSION_MAP[type(child)](child, workspace)
-                data += [converter.from_geoh5()]
-
-            self.element.data = data
 
 
 class GeometryConversion(BaseConversion):
@@ -306,29 +301,37 @@ class ProjectConversion(BaseConversion):
 
     omf_type = Project
     geoh5_type = RootGroup
+    _attribute_map: dict = {
+        "uid": "uid",
+        "name": "name",
+        "author": "contributors",
+        "units": "distance_unit",
+        "revision": "version",
+    }
 
-    def from_omf(self, **kwargs) -> Entity:
+    def from_omf(self, **kwargs) -> RootGroup:
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
             kwargs = self.collect_omf_attributes(**kwargs)
-            self._entity = workspace.root
+            self._entity: RootGroup = workspace.root
 
             for key, value in kwargs.items():
                 setattr(self._entity, key, value)
 
-            self.process_dependents(workspace)
+            self.process_dependents(self._element, workspace)
 
         return self._entity
 
-    def process_dependents(self, workspace):
-        if getattr(self.element, "elements", None) is not None:
-            for elem in self.element.elements:
-                converter = _CONVERSION_MAP[type(elem)](elem, workspace)
-                converter.from_omf(parent=self.entity)
+    def from_geoh5(self, **kwargs) -> Project:
+        """Convert RootGroup to omf Project."""
+        with fetch_h5_handle(self.geoh5) as workspace:
+            kwargs = self.collect_h5_attributes(**kwargs)
+            uid = kwargs.pop("uid")
+            self._element = self.omf_type(**kwargs)
+            self._element._backend.update({"uid": uid})  # pylint: disable=W0212
+            self._element.elements = self.process_dependents(self.entity, workspace)
 
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
+        return self._element
 
 
 class ValuesConversion(BaseConversion):
@@ -574,6 +577,7 @@ _CONVERSION_MAP = {
     PointSetElement: PointsConversion,
     PointSetGeometry: PointSetGeometryConversion,
     Project: ProjectConversion,
+    RootGroup: ProjectConversion,
     ScalarArray: ValuesConversion,
     ScalarData: DataConversion,
     SurfaceElement: SurfaceConversion,

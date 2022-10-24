@@ -160,4 +160,3 @@ def test_doc_ex(tmp_path):
         proj.elements[3].textures[0].uid
     )
     del reader
-    os.remove(serial_file)
