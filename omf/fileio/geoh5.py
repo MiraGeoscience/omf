@@ -14,7 +14,7 @@ from geoh5py.shared import Entity
 from geoh5py.workspace import Workspace
 
 from omf.base import Project, UidModel
-from omf.data import Int2Array, ScalarArray, ScalarData, Vector3Array
+from omf.data import Int2Array, ScalarArray, ScalarColormap, ScalarData, Vector3Array
 from omf.lineset import LineSetElement, LineSetGeometry
 from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
@@ -170,21 +170,25 @@ class BaseConversion(ABC):
 
     def process_dependents(self, parent: UidModel | Entity, workspace) -> list:
         children = []
+        children_list = []
         if isinstance(parent, UidModel):
-
+            method = "from_omf"
             if getattr(parent, "data", None):
-                for child in parent.data:
-                    converter = _CONVERSION_MAP[type(child)](child, workspace)
-                    children += [converter.from_omf(parent=self.entity)]
+                children_list = parent.data
             elif getattr(parent, "elements", None):
-                for child in parent.elements:
-                    converter = _CONVERSION_MAP[type(child)](child, workspace)
-                    children += [converter.from_omf(parent=self.entity)]
+                children_list = parent.elements
 
-        elif isinstance(parent, Entity) and getattr(parent, "children", None):
-            for child in parent.children:
-                converter = _CONVERSION_MAP[type(child)](child, workspace)
-                children += [converter.from_geoh5()]
+        else:
+            method = "from_geoh5"
+            children_list = getattr(parent, "children", [])
+
+        for child in children_list:
+            if type(child) not in _CONVERSION_MAP:
+                # raise OMFtoGeoh5NotImplemented(type(child))
+                continue
+
+            converter = _CONVERSION_MAP[type(child)](child, workspace)
+            children += [getattr(converter, method)(parent=self.entity)]
 
         return children
 
@@ -213,7 +217,14 @@ class DataConversion(BaseConversion):
             else:
                 kwargs["association"] = "VERTEX"
 
+            colormap = None
+            if "color_map" in kwargs:
+                colormap = kwargs.pop("color_map")
+
             self._entity = parent.add_data({self.element.name: kwargs})
+
+            if colormap is not None:
+                self._entity.entity_type.color_map = colormap
 
         return self._entity
 
@@ -333,6 +344,19 @@ class ProjectConversion(BaseConversion):
         return self._element
 
 
+class ArrayConversion(BaseConversion):
+    """
+    Conversion from :obj:`omf.data.Int2Array` or `Vector3Array` to :obj:`numpy.ndarray`
+    """
+
+    omf_type = ScalarArray
+    geoh5_type = np.ndarray
+    _attribute_map: dict = {}
+
+    def from_omf(self, **kwargs) -> np.ndarray | None:
+        return np.c_[self.element]
+
+
 class ValuesConversion(BaseConversion):
     """
     Conversion between :obj:`omf.data.ScalarArray` and
@@ -346,26 +370,22 @@ class ValuesConversion(BaseConversion):
     def from_omf(self, **kwargs) -> np.ndarray | None:
         return self.element.array
 
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
 
-
-class ArrayConversion(BaseConversion):
+class ColormapConversion(BaseConversion):
     """
-    Conversion from :obj:`omf.data.Int2Array` or `Vector3Array` to :obj:`numpy.ndarray`
+    Conversion from :obj:`omf.data.ColorMap` :obj:`numpy.ndarray`
     """
 
-    omf_type = ScalarArray
+    omf_type = ScalarColormap
     geoh5_type = np.ndarray
     _attribute_map: dict = {}
 
     def from_omf(self, **kwargs) -> np.ndarray | None:
-        return np.c_[self.element]
-
-    def from_geoh5(self) -> UidModel:
-        """TODO Convert geoh5 entity to omf element."""
-        raise NotImplementedError
+        colors = np.vstack(self.element.gradient.array)
+        values = np.linspace(
+            self.element.limits[0], self.element.limits[1], colors.shape[0]
+        )
+        return np.c_[values, colors, np.ones_like(values)]
 
 
 class PointSetGeometryConversion(GeometryConversion):
@@ -578,6 +598,7 @@ _CONVERSION_MAP = {
     Project: ProjectConversion,
     RootGroup: ProjectConversion,
     ScalarArray: ValuesConversion,
+    ScalarColormap: ColormapConversion,
     ScalarData: DataConversion,
     SurfaceElement: SurfaceConversion,
     SurfaceGeometry: SurfaceGeometryConversion,
