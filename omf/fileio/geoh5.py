@@ -304,7 +304,6 @@ class ProjectConversion(BaseConversion):
     _attribute_map: dict = {
         "uid": "uid",
         "name": "name",
-        "author": "contributors",
         "units": "distance_unit",
         "revision": "version",
     }
@@ -345,7 +344,7 @@ class ValuesConversion(BaseConversion):
     _attribute_map: dict = {"array": "values"}
 
     def from_omf(self, **kwargs) -> np.ndarray | None:
-        return np.r_[self.element]
+        return self.element.array
 
     def from_geoh5(self) -> UidModel:
         """TODO Convert geoh5 entity to omf element."""
