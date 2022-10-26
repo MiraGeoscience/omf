@@ -7,14 +7,22 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from geoh5py.data import Data, FloatData
+from geoh5py.data import Data, FloatData, ReferencedData
 from geoh5py.groups import RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, Points, Surface
 from geoh5py.shared import Entity
 from geoh5py.workspace import Workspace
 
 from omf.base import Project, UidModel
-from omf.data import Int2Array, ScalarArray, ScalarColormap, ScalarData, Vector3Array
+from omf.data import (
+    Int2Array,
+    MappedData,
+    ScalarArray,
+    ScalarColormap,
+    ScalarData,
+    StringArray,
+    Vector3Array,
+)
 from omf.lineset import LineSetElement, LineSetGeometry
 from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
@@ -55,13 +63,31 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
 
     @entity.setter
     def entity(self, element):
-        if type(element) not in _CONVERSION_MAP:
-            raise OMFtoGeoh5NotImplemented(
-                f"Element of type {type(element)} currently not implemented."
-            )
-
-        converter = _CONVERSION_MAP[type(element)](element, self.file)
+        converter = get_conversion_map(element, self.file)
         self._entity = converter.from_omf()
+
+
+def get_conversion_map(element: UidModel | Entity, workspace: str | Path | Workspace):
+    """
+    Utility method to get the appropriate conversion class is it exists.
+
+    :param element: Either an omf or geoh5 class.
+    :param workspace: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+
+    :returns: A sub-class of BaseConversion for the given element.
+    """
+    if type(element) not in _CONVERSION_MAP:
+        raise OMFtoGeoh5NotImplemented(
+            f"Element of type {type(element)} currently not implemented."
+        )
+
+    # Special case for SurfaceElement describing Grid2D
+    if isinstance(element, SurfaceElement) and isinstance(
+        element.geometry, SurfaceGridGeometry
+    ):
+        return SurfaceGridConversion(element, workspace)
+
+    return _CONVERSION_MAP[type(element)](element, workspace)
 
 
 class GeoH5Reader:  # pylint: disable=too-few-public-methods
@@ -109,14 +135,11 @@ class BaseConversion(ABC):
             for key, alias in self._attribute_map.items():
                 prop = getattr(self.element, key, None)
 
-                if type(prop) in _CONVERSION_MAP:
-                    converter = _CONVERSION_MAP[type(prop)](prop, workspace)
+                if prop is None:
+                    continue
 
-                    if converter.geoh5_type is np.ndarray:
-                        kwargs[alias] = converter.from_omf()
-                    else:
-                        kwargs = converter.from_omf(**kwargs)
-
+                if isinstance(alias, type(BaseConversion)):
+                    kwargs = alias(prop, workspace).from_omf(**kwargs)
                 else:
                     kwargs[alias] = prop
 
@@ -177,38 +200,38 @@ class BaseConversion(ABC):
                 children_list = parent.data
             elif getattr(parent, "elements", None):
                 children_list = parent.elements
+            kwargs = {"parent": self.entity}
 
         else:
             method = "from_geoh5"
             children_list = getattr(parent, "children", [])
+            kwargs = {}
 
         for child in children_list:
-            if type(child) not in _CONVERSION_MAP:
-                # raise OMFtoGeoh5NotImplemented(type(child))
+            try:
+                converter = get_conversion_map(child, workspace)
+                children += [getattr(converter, method)(**kwargs)]
+            except OMFtoGeoh5NotImplemented as error:
+                warnings.warn(error.args[0])
                 continue
-
-            converter = _CONVERSION_MAP[type(child)](child, workspace)
-            children += [getattr(converter, method)(parent=self.entity)]
 
         return children
 
 
 class DataConversion(BaseConversion):
     """
-    Conversion between :obj:`omf.data.ScalarData` and
+    Conversion between :obj:`omf.data.Data` and
     :obj:`geoh5py.data.Data`
     """
 
-    omf_type = ScalarData
+    omf_type = UidModel
     geoh5_type = Data
     _attribute_map: dict[str, Any] = {
         "uid": "uid",
         "name": "name",
-        "array": "values",
-        "colormap": "color_map",
     }
 
-    def from_omf(self, parent=None, **kwargs) -> Data:
+    def from_omf(self, parent=None, **kwargs) -> Data | dict:
         with fetch_h5_handle(self.geoh5):
             kwargs = self.collect_omf_attributes(**kwargs)
 
@@ -254,7 +277,6 @@ class ElementConversion(BaseConversion):
     _attribute_map: dict[str, Any] = {
         "name": "name",
         "uid": "uid",
-        "geometry": None,
     }
 
     def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace):
@@ -263,7 +285,7 @@ class ElementConversion(BaseConversion):
         if isinstance(obj, UidModel):
             self.geoh5_type = _CLASS_MAP[type(self.element.geometry)]
 
-    def from_omf(self, **kwargs) -> Entity | None:
+    def from_omf(self, parent=None, **kwargs) -> Entity | None:
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
             try:
@@ -292,7 +314,7 @@ class ElementConversion(BaseConversion):
 
 
 class GeometryConversion(BaseConversion):
-    def from_omf(self, **kwargs) -> dict:
+    def from_omf(self, parent=None, **kwargs) -> dict:
         """Generate a dictionary of arguments from omf element."""
         kwargs = self.collect_omf_attributes(**kwargs)
         return kwargs
@@ -319,7 +341,7 @@ class ProjectConversion(BaseConversion):
         "revision": "version",
     }
 
-    def from_omf(self, **kwargs) -> RootGroup:
+    def from_omf(self, parent=None, **kwargs) -> RootGroup:
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
             kwargs = self.collect_omf_attributes(**kwargs)
@@ -344,20 +366,23 @@ class ProjectConversion(BaseConversion):
         return self._element
 
 
-class ArrayConversion(BaseConversion):
-    """
-    Conversion from :obj:`omf.data.Int2Array` or `Vector3Array` to :obj:`numpy.ndarray`
-    """
+# class ArrayConversion(BaseConversion):
+#     """
+#     Conversion from :obj:`omf.data.Int2Array` or `Vector3Array` to :obj:`numpy.ndarray`
+#     """
+#
+#     omf_type = ScalarArray
+#     geoh5_type = np.ndarray
+#     _attribute_map: dict = {}
+#
+#     def from_omf(self, **kwargs) -> dict:
+#
+#         if getattr(self.element, "array", None) is not None:
+#             kwargs["values"] = np.c_[self.element.array]
+#         return kwargs
 
-    omf_type = ScalarArray
-    geoh5_type = np.ndarray
-    _attribute_map: dict = {}
 
-    def from_omf(self, **kwargs) -> np.ndarray | None:
-        return np.c_[self.element]
-
-
-class ValuesConversion(BaseConversion):
+class ValuesConversion(DataConversion):
     """
     Conversion between :obj:`omf.data.ScalarArray` and
     :obj:`geoh5py.data.Data.values`
@@ -367,8 +392,50 @@ class ValuesConversion(BaseConversion):
     geoh5_type = np.ndarray
     _attribute_map: dict = {"array": "values"}
 
-    def from_omf(self, **kwargs) -> np.ndarray | None:
-        return self.element.array
+    def from_omf(self, parent=None, **kwargs) -> dict:
+        kwargs = self.collect_omf_attributes(**kwargs)
+        return kwargs
+
+
+class StringArrayConversion(DataConversion):
+    """
+    Conversion between :obj:`omf.data.ScalarArray` and
+    :obj:`geoh5py.data.Data.values`
+    """
+
+    omf_type = StringArray
+    geoh5_type = list
+    _attribute_map: dict = {"array": "values"}
+
+    def from_omf(self, parent=None, **kwargs) -> dict:
+        kwargs = self.collect_omf_attributes(**kwargs)
+        return kwargs
+
+
+class ReferenceMapConversion(BaseConversion):
+
+    omf_type = list
+    geoh5_type = ReferencedData
+
+    # TODO Finish conversion
+    def from_omf(self, parent=None, **kwargs) -> dict:
+        value_map = StringArrayConversion(self.element[0], self.geoh5).from_omf()
+        kwargs["value_map"] = value_map
+        kwargs["type"] = "referenced"
+        return kwargs
+
+
+class MappedDataConversion(DataConversion):
+    """
+    Conversion from :obj:`omf.data.MappedData` to :obj:`geoh5py.data.referenced_data`
+    """
+
+    omf_type = MappedData
+    geoh5_type = ReferencedData
+    _attribute_map = DataConversion._attribute_map.copy()
+    _attribute_map.update(
+        {"indices": ValuesConversion, "legends": ReferenceMapConversion}
+    )
 
 
 class ColormapConversion(BaseConversion):
@@ -380,12 +447,19 @@ class ColormapConversion(BaseConversion):
     geoh5_type = np.ndarray
     _attribute_map: dict = {}
 
-    def from_omf(self, **kwargs) -> np.ndarray | None:
+    def from_omf(self, parent=None, **kwargs) -> dict:
         colors = np.vstack(self.element.gradient.array)
         values = np.linspace(
             self.element.limits[0], self.element.limits[1], colors.shape[0]
         )
-        return np.c_[values, colors, np.ones_like(values)]
+
+        kwargs["color_map"] = np.c_[values, colors, np.ones_like(values)]
+        return kwargs
+
+
+class ScalarDataConversion(DataConversion):
+    _attribute_map = DataConversion._attribute_map.copy()
+    _attribute_map.update({"array": ValuesConversion, "colormap": ColormapConversion})
 
 
 class PointSetGeometryConversion(GeometryConversion):
@@ -465,6 +539,10 @@ class SurfaceGridGeometryConversion(GeometryConversion):
             )
             kwargs.update({"dip": dip})
 
+        if self.element.offset_w is not None:
+            warnings.warn(
+                str(OMFtoGeoh5NotImplemented("Warped Grid2D with 'offset_w'."))
+            )
         return kwargs
 
 
@@ -522,16 +600,32 @@ class CurveConversion(ElementConversion):
 
     omf_type = LineSetElement
     geoh5_type: Curve
+    _attribute_map = ElementConversion._attribute_map.copy()
+    _attribute_map["geometry"] = LineSetGeometryConversion
 
 
 class SurfaceConversion(ElementConversion):
     """
-    Conversion between :obj:`omf.lineset.LineSetElement` and
-    :obj:`geoh5py.objects.Curve`
+    Conversion between :obj:`omf.lineset.SurfaceElement` and
+    :obj:`geoh5py.objects.Surface`
     """
 
     omf_type = SurfaceElement
-    geoh5_type: Surface | Grid2D
+    geoh5_type: Surface
+    _attribute_map = ElementConversion._attribute_map.copy()
+    _attribute_map["geometry"] = SurfaceGeometryConversion
+
+
+class SurfaceGridConversion(ElementConversion):
+    """
+    Conversion between :obj:`omf.lineset.SurfaceElement` and
+    :obj:`geoh5py.objects.Grid2D`
+    """
+
+    omf_type = SurfaceElement
+    geoh5_type: Grid2D
+    _attribute_map = ElementConversion._attribute_map.copy()
+    _attribute_map["geometry"] = SurfaceGridGeometryConversion
 
 
 class VolumeConversion(ElementConversion):
@@ -542,6 +636,8 @@ class VolumeConversion(ElementConversion):
 
     omf_type = VolumeElement
     geoh5_type: BlockModel
+    _attribute_map = ElementConversion._attribute_map.copy()
+    _attribute_map["geometry"] = VolumeGridGeometryConversion
 
 
 @contextmanager
@@ -588,22 +684,22 @@ _CLASS_MAP = {
 }
 
 _CONVERSION_MAP = {
-    FloatData: DataConversion,
-    Int2Array: ArrayConversion,
+    BlockModel: VolumeConversion,
+    Curve: CurveConversion,
+    FloatData: ScalarDataConversion,
+    Grid2D: SurfaceGridConversion,
+    Int2Array: ValuesConversion,
     LineSetElement: CurveConversion,
-    LineSetGeometry: LineSetGeometryConversion,
+    MappedData: MappedDataConversion,
     Points: PointsConversion,
     PointSetElement: PointsConversion,
-    PointSetGeometry: PointSetGeometryConversion,
     Project: ProjectConversion,
     RootGroup: ProjectConversion,
     ScalarArray: ValuesConversion,
     ScalarColormap: ColormapConversion,
-    ScalarData: DataConversion,
+    ScalarData: ScalarDataConversion,
+    Surface: SurfaceConversion,
     SurfaceElement: SurfaceConversion,
-    SurfaceGeometry: SurfaceGeometryConversion,
-    SurfaceGridGeometry: SurfaceGridGeometryConversion,
-    Vector3Array: ArrayConversion,
+    Vector3Array: ValuesConversion,
     VolumeElement: VolumeConversion,
-    VolumeGridGeometry: VolumeGridGeometryConversion,
 }
