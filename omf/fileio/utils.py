@@ -19,3 +19,6 @@ def compare_elements(elem_a, elem_b):
     if hasattr(elem_a, "data") and elem_a.data:
         for data_a, data_b in zip(elem_a.data, elem_b.data):
             compare_elements(data_a, data_b)
+
+    if hasattr(elem_a, "colormap") and elem_a.colormap:
+        compare_elements(elem_a.colormap, elem_b.colormap)
