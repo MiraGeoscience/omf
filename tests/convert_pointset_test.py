@@ -3,7 +3,6 @@
 import numpy as np
 import numpy.testing
 from geoh5py.workspace import Workspace
-from properties import Color
 
 import omf
 

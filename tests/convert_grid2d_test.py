@@ -42,3 +42,8 @@ def test_grid2d_to_geoh5(tmp_path):
 
         data = grid2d.get_entity("rand face data")[0]
         np.testing.assert_array_almost_equal(np.r_[grid.data[1].array], data.values)
+
+    project = omf.fileio.geoh5.GeoH5Reader(file).project
+    omf_grid = project.elements[0]
+
+    omf.fileio.utils.compare_elements(omf_grid, grid)

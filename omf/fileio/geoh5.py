@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from geoh5py.data import Data, FloatData, ReferencedData
+from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
 from geoh5py.groups import RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
 from geoh5py.shared import Entity
@@ -17,6 +17,7 @@ from omf.base import Project, UidModel
 from omf.data import (
     ColorArray,
     Int2Array,
+    Legend,
     MappedData,
     ScalarArray,
     ScalarColormap,
@@ -139,11 +140,14 @@ class BaseConversion(ABC):
                     )
                     kwargs = conversion.collect_omf_attributes(prop, **kwargs)
                 else:
+                    if hasattr(prop, "copy"):
+                        prop = prop.copy()
+
                     kwargs[alias] = prop
 
         return kwargs
 
-    def collect_h5_attributes(self, entity, **kwargs):
+    def collect_h5_attributes(self, entity, **kwargs) -> dict:
         with fetch_h5_handle(self.geoh5) as workspace:
             for key, alias in self._attribute_map.items():
 
@@ -163,7 +167,7 @@ class BaseConversion(ABC):
     def from_omf(self, element, **kwargs) -> Entity | None:
         """Convert omf element to geoh5 entity."""
 
-    def from_geoh5(self, entity, **kwargs) -> UidModel | None:
+    def from_geoh5(self, entity, **kwargs) -> UidModel | list | None:
         """Generate an omf element from geoh5 attributes."""
         with fetch_h5_handle(self.geoh5):
             kwargs = self.collect_h5_attributes(entity, **kwargs)
@@ -214,7 +218,8 @@ class DataConversion(BaseConversion):
     def from_omf(self, element, **kwargs) -> Data | dict:
         with fetch_h5_handle(self.geoh5):
 
-            parent = kwargs.get("parent", None)
+            kwargs = self.collect_omf_attributes(element, **kwargs)
+            parent = kwargs.pop("parent", None)
 
             if not isinstance(parent, ObjectBase):
                 raise UserWarning(
@@ -222,18 +227,16 @@ class DataConversion(BaseConversion):
                     "'parent' of type ObjectBase."
                 )
 
-            kwargs = self.collect_omf_attributes(element, **kwargs)
-
             if element.location in ["faces", "cells", "segments"]:
                 kwargs["association"] = "CELL"
             else:
                 kwargs["association"] = "VERTEX"
 
-            colormap = None
-            if "color_map" in kwargs:
-                colormap = kwargs.pop("color_map")
+            colormap = kwargs.pop("color_map", None)
 
-            if "referenced" in kwargs and "values" in kwargs:
+            if kwargs.get("type", None) == "referenced" and isinstance(
+                kwargs.get("values", None), np.ndarray
+            ):
                 kwargs["values"] += 1
 
             entity = parent.add_data({element.name: kwargs})
@@ -253,6 +256,11 @@ class DataConversion(BaseConversion):
                 kwargs["location"] = "vertices"
             else:
                 kwargs["location"] = _ASSOCIATION_MAP[type(entity.parent)]
+
+            if isinstance(self, MappedDataConversion) and isinstance(
+                kwargs.get("indices", None), np.ndarray
+            ):
+                kwargs["indices"] = (kwargs["indices"] - 1).astype(int)
 
             element = self.omf_type(**kwargs)
             if hasattr(element, "_backend"):
@@ -397,7 +405,7 @@ class ReferenceMapConversion(BaseConversion):
     geoh5_type = ReferencedData
 
     def collect_omf_attributes(self, element, **kwargs) -> dict:
-        value_map = {count + 1: val for count, val in enumerate(element[0].values)}
+        value_map = {count + 1: str(val) for count, val in enumerate(element[0].values)}
         color_map = np.vstack(
             [np.r_[count + 1, val, 1.0] for count, val in enumerate(element[1].values)]
         )
@@ -405,6 +413,21 @@ class ReferenceMapConversion(BaseConversion):
         kwargs["type"] = "referenced"
         kwargs["color_map"] = color_map
         return kwargs
+
+    def from_geoh5(self, entity, **kwargs) -> list:
+        """Generate an omf element from geoh5 attributes."""
+        with fetch_h5_handle(self.geoh5):
+            return [
+                Legend(values=StringArray(array=list(entity.value_map.map.values()))),
+                Legend(
+                    values=ColorArray(
+                        array=entity.entity_type.color_map.values[1:-1, :]
+                        .astype(int)
+                        .reshape((-1, 3))
+                        .tolist()
+                    )
+                ),
+            ]
 
 
 class MappedDataConversion(DataConversion):
@@ -565,6 +588,33 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
             )
         return kwargs
 
+    def collect_h5_attributes(self, entity, **kwargs) -> dict:
+        with fetch_h5_handle(self.geoh5):
+            for key, alias in self._attribute_map.items():
+                cell_size, count = getattr(entity, f"{alias}_cell_size"), getattr(
+                    entity, f"{alias}_count"
+                )
+                tensor = np.ones(count) * cell_size
+                kwargs.update({f"tensor_{key}": tensor})
+
+            if entity.rotation is not None or entity.dip is not None:
+                dip = np.deg2rad(getattr(entity, "dip", 0.0))
+                azm = np.deg2rad(getattr(entity, "azimuth", 0.0))
+                rot = rotation_opt(azm, dip)
+
+                kwargs["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
+                kwargs["axis_v"] = rot.dot(np.c_[0.0, 1.0, 0.0].T).flatten()
+
+            kwargs.update(
+                {
+                    "origin": np.r_[
+                        entity.origin["x"], entity.origin["y"], entity.origin["z"]
+                    ]
+                }
+            )
+
+            return kwargs
+
 
 class VolumeGridGeometryConversion(BaseGeometryConversion):
     """
@@ -598,6 +648,31 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
         kwargs.update({"origin": np.r_[element.origin]})
 
         return kwargs
+
+    def collect_h5_attributes(self, entity, **kwargs) -> dict:
+        with fetch_h5_handle(self.geoh5):
+            for key, alias in self._attribute_map.items():
+                cell_delimiter = getattr(entity, f"{alias}_cell_delimiters")
+                tensor = np.diff(cell_delimiter)
+                kwargs.update({f"tensor_{key}": tensor})
+
+            if entity.rotation is not None:
+
+                azm = np.deg2rad(getattr(entity, "rotation", 0.0))
+                rot = rotation_opt(azm, 0.0)
+
+                kwargs["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
+                kwargs["axis_v"] = rot.dot(np.c_[0.0, 1.0, 0.0].T).flatten()
+
+            kwargs.update(
+                {
+                    "origin": np.r_[
+                        entity.origin["x"], entity.origin["y"], entity.origin["z"]
+                    ]
+                }
+            )
+
+            return kwargs
 
 
 class PointsConversion(ElementConversion):
@@ -660,6 +735,21 @@ class VolumeConversion(ElementConversion):
     _attribute_map["geometry"] = VolumeGridGeometryConversion
 
 
+def rotation_opt(azm, dip):
+    """Construct a 3D rotation matrix from azimuth and dip angles in degree."""
+    r_x = np.r_[
+        np.c_[1, 0, 0],
+        np.c_[0, np.cos(dip), -np.sin(dip)],
+        np.c_[0, np.sin(dip), np.cos(dip)],
+    ]
+    r_z = np.r_[
+        np.c_[np.cos(azm), -np.sin(azm), 0],
+        np.c_[np.sin(azm), np.cos(azm), 0],
+        np.c_[0, 0, 1],
+    ]
+    return r_z.dot(r_x)
+
+
 @contextmanager
 def fetch_h5_handle(file: str | Workspace | Path, mode: str = "a") -> Workspace:
     """
@@ -709,11 +799,13 @@ _CONVERSION_MAP = {
     FloatData: ScalarDataConversion,
     Grid2D: SurfaceGridConversion,
     Int2Array: ValuesConversion,
+    IntegerData: ScalarDataConversion,
     LineSetElement: CurveConversion,
     MappedData: MappedDataConversion,
     Points: PointsConversion,
     PointSetElement: PointsConversion,
     Project: ProjectConversion,
+    ReferencedData: MappedDataConversion,
     RootGroup: ProjectConversion,
     ScalarArray: ValuesConversion,
     ScalarColormap: ColormapConversion,

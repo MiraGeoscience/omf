@@ -8,10 +8,11 @@ def compare_elements(elem_a, elem_b):
 
     if hasattr(elem_a, "geometry"):
         for attr in elem_a.geometry._valid_locations:
-            testing.assert_allclose(
-                getattr(elem_a.geometry, attr).array,
-                getattr(elem_b.geometry, attr).array,
-            )
+            if getattr(elem_a.geometry, attr, None) is not None:
+                testing.assert_allclose(
+                    getattr(elem_a.geometry, attr).array,
+                    getattr(elem_b.geometry, attr).array,
+                )
 
     if hasattr(elem_a, "array"):
         testing.assert_allclose(elem_a.array.array, elem_b.array.array)
