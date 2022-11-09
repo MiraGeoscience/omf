@@ -69,12 +69,15 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
         self._entity = converter.from_omf(element)
 
 
-def get_conversion_map(element: UidModel | Entity, workspace: str | Path | Workspace):
+def get_conversion_map(
+    element: UidModel | Entity, workspace: str | Path | Workspace, parent=None
+):
     """
     Utility method to get the appropriate conversion class is it exists.
 
     :param element: Either an omf or geoh5 class.
     :param workspace: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+    :param parent: Optional parent method for values.
 
     :returns: A sub-class of BaseConversion for the given element.
     """
@@ -87,9 +90,9 @@ def get_conversion_map(element: UidModel | Entity, workspace: str | Path | Works
     if isinstance(element, SurfaceElement) and isinstance(
         element.geometry, SurfaceGridGeometry
     ):
-        return SurfaceGridConversion(element, workspace)
+        return SurfaceGridConversion(element, workspace, parent=parent)
 
-    return _CONVERSION_MAP[type(element)](element, workspace)
+    return _CONVERSION_MAP[type(element)](element, workspace, parent=parent)
 
 
 class GeoH5Reader:  # pylint: disable=too-few-public-methods
@@ -119,12 +122,15 @@ class BaseConversion:
     }
     _element = None
     _entity = None
+    _parent = None
+    _mapping = None
 
-    def __init__(self, element, geoh5: str | Path | Workspace):
+    def __init__(self, element, geoh5: str | Path | Workspace, parent=None):
         if element is None:
             raise ValueError("Input 'element' cannot be None.")
 
         self.geoh5 = geoh5
+        self._parent = parent
 
     def collect_omf_attributes(self, element, **kwargs):
         with fetch_h5_handle(self.geoh5) as workspace:
@@ -136,7 +142,7 @@ class BaseConversion:
 
                 if isinstance(alias, type(BaseConversion)):
                     conversion = alias(  # pylint: disable=not-callable
-                        element, workspace
+                        element, workspace, parent=self._parent
                     )
                     kwargs = conversion.collect_omf_attributes(prop, **kwargs)
                 else:
@@ -153,7 +159,7 @@ class BaseConversion:
 
                 if isinstance(alias, type(BaseConversion)):
                     conversion = alias(  # pylint: disable=not-callable
-                        entity, workspace
+                        entity, workspace, parent=self._parent
                     )
                     kwargs = conversion.collect_h5_attributes(
                         entity, workspace, **kwargs
@@ -199,7 +205,7 @@ class BaseContainerConversion(ABC, BaseConversion):
 
         for child in children_list:
             try:
-                converter = get_conversion_map(child, workspace)
+                converter = get_conversion_map(child, workspace, parent=element)
                 children += [getattr(converter, method)(child, **kwargs)]
             except OMFtoGeoh5NotImplemented as error:
                 warnings.warn(error.args[0])
@@ -273,8 +279,8 @@ class ElementConversion(BaseContainerConversion):
         "uid": "uid",
     }
 
-    def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace):
-        super().__init__(obj, geoh5)
+    def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace, **kwargs):
+        super().__init__(obj, geoh5, **kwargs)
 
         if isinstance(obj, UidModel) and hasattr(obj, "geometry"):
             self.geoh5_type = _CLASS_MAP[type(obj.geometry)]
@@ -356,10 +362,26 @@ class ArrayConversion(BaseConversion):
     geoh5_type = Data
     _attribute_map: dict = {"array": "values"}
 
+    def collect_omf_attributes(self, element, **kwargs) -> dict:
+        values = getattr(element, "array")
+        if values is not None:
+
+            conversion = _VALUE_MAP.get(type(self._parent), None)
+            if conversion is not None:
+                values = conversion(self._parent, values)
+
+            kwargs.update({"values": values.copy()})
+        return kwargs
+
     def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
             values = getattr(entity, "values", None)
             if values is not None:
+
+                conversion = _VALUE_MAP.get(type(self._parent), None)
+                if conversion is not None:
+                    values = conversion(self._parent, values)
+
                 kwargs.update({"array": values.copy()})
         return kwargs
 
@@ -648,31 +670,10 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
     geoh5_type = BlockModel
     _attribute_map: dict = {"u": "u", "v": "v", "w": "z"}
 
-    def reorder(self, parent, values):
-
-        if isinstance(parent, UidModel):
-            values = values.reshape(
-                (
-                    parent.tensor_u.shape[0],
-                    parent.tensor_v.shape[0],
-                    parent.tensor_w.shape[0],
-                ),
-                order="C",
-            )
-            values = values.transpose((2, 0, 1))[::-1, :, :].reshape((-1, 1), order="F")
-
-        else:
-            values = values.reshape(
-                (
-                    parent.shape[2],
-                    parent.shape[0],
-                    parent.shape[1],
-                ),
-                order="F",
-            )[::-1, :, :]
-            values = values.transpose((1, 2, 0)).flatten()
-
-        return values
+    def __init__(
+        self, obj: UidModel | Entity, geoh5: str | Path | Workspace, parent=None
+    ):
+        super().__init__(obj, geoh5, parent=parent)
 
     def collect_omf_attributes(self, element, **kwargs) -> dict:
         if not np.allclose(np.cross(element.axis_w, [0, 0, 1]), [0, 0, 0]):
@@ -826,6 +827,33 @@ def fetch_h5_handle(file: str | Workspace | Path, mode: str = "a") -> Workspace:
             h5file.close()
 
 
+def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarray):
+    """Utility function to re-order 3D Block model values."""
+    if isinstance(entity, VolumeElement):
+        values = values.reshape(
+            (
+                entity.geometry.tensor_u.shape[0],
+                entity.geometry.tensor_v.shape[0],
+                entity.geometry.tensor_w.shape[0],
+            ),
+            order="C",
+        )
+        values = values.transpose((2, 0, 1))[::-1, :, :].flatten(order="F")
+
+    else:
+        values = values.reshape(
+            (
+                entity.shape[2],
+                entity.shape[0],
+                entity.shape[1],
+            ),
+            order="F",
+        )[::-1, :, :]
+        values = values.transpose((1, 2, 0)).flatten()
+
+    return values
+
+
 _ASSOCIATION_MAP = {
     Curve: "segments",
     Surface: "faces",
@@ -841,7 +869,7 @@ _CLASS_MAP = {
     VolumeGridGeometry: BlockModel,
 }
 
-_CONVERSION_MAP = {
+_CONVERSION_MAP: dict = {
     BlockModel: VolumeConversion,
     Curve: CurveConversion,
     FloatData: ScalarDataConversion,
@@ -862,4 +890,9 @@ _CONVERSION_MAP = {
     SurfaceElement: SurfaceConversion,
     Vector3Array: ArrayConversion,
     VolumeElement: VolumeConversion,
+}
+
+_VALUE_MAP: dict = {
+    BlockModel: block_model_reordering,
+    VolumeElement: block_model_reordering,
 }
