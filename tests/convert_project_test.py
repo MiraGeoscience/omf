@@ -19,4 +19,6 @@ def test_project_to_geoh5(tmp_path):
     with Workspace(file) as workspace:
         assert len(workspace.objects) == len(proj.elements) - 1
 
-    reader = omf.GeoH5()
+    project = omf.fileio.geoh5.GeoH5Reader(file).project
+
+    assert len(project.elements) == len(proj.elements) - 1
