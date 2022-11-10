@@ -356,10 +356,17 @@ class ArrayConversion(BaseConversion):
         with fetch_h5_handle(workspace):
             if isinstance(element, UidModel):
                 values = np.r_[getattr(element, "array")]
-                values[np.isclose(values, FLOAT_NDV)] = np.nan
+
+                if np.issubdtype(values.dtype, np.floating):
+                    values[np.isclose(values, FLOAT_NDV)] = np.nan
+
             else:
                 values = getattr(element, "values", None)
-                values[np.isnan(values)] = FLOAT_NDV
+
+                if np.issubdtype(values.dtype, np.floating):
+                    values[np.isnan(values)] = FLOAT_NDV
+                else:
+                    values[np.isclose(values, INTEGER_NDV)] = 0
 
             if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
