@@ -1,6 +1,7 @@
 """Tests for PointSet validation"""
 
 import numpy as np
+import pytest
 from geoh5py.workspace import Workspace
 
 import omf
@@ -32,7 +33,9 @@ def test_grid2d_to_geoh5(tmp_path):
         ],
     )
     file = str(tmp_path / "grid2d.geoh5")
-    omf.OMFWriter(grid, file)
+
+    with pytest.warns(UserWarning):
+        omf.OMFWriter(grid, file)
 
     with Workspace(file) as workspace:
         grid2d = workspace.get_entity("gridsurf")[0]
