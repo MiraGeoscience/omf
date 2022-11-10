@@ -10,7 +10,7 @@ import numpy as np
 from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
 from geoh5py.groups import RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
-from geoh5py.shared import Entity
+from geoh5py.shared import FLOAT_NDV, Entity
 from geoh5py.workspace import Workspace
 
 from omf.base import Project, UidModel
@@ -108,7 +108,7 @@ class GeoH5Reader:  # pylint: disable=too-few-public-methods
             self.project = converter.from_geoh5(workspace.root)
 
 
-class BaseConversion:
+class BaseConversion(ABC):
     """
     Base conversion between OMF and geoh5 format.
     """
@@ -131,52 +131,6 @@ class BaseConversion:
 
         self.geoh5 = geoh5
         self._parent = parent
-
-    def collect_omf_attributes(self, element, **kwargs):
-        with fetch_h5_handle(self.geoh5) as workspace:
-            for key, alias in self._attribute_map.items():
-                prop = getattr(element, key, None)
-
-                if prop is None:
-                    continue
-
-                if isinstance(alias, type(BaseConversion)):
-                    conversion = alias(  # pylint: disable=not-callable
-                        element, workspace, parent=self._parent
-                    )
-                    kwargs = conversion.collect_omf_attributes(prop, **kwargs)
-                else:
-                    if hasattr(prop, "copy"):
-                        prop = prop.copy()
-
-                    kwargs[alias] = prop
-
-        return kwargs
-
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
-        with fetch_h5_handle(workspace):
-            for key, alias in self._attribute_map.items():
-
-                if isinstance(alias, type(BaseConversion)):
-                    conversion = alias(  # pylint: disable=not-callable
-                        entity, workspace, parent=self._parent
-                    )
-                    kwargs = conversion.collect_h5_attributes(
-                        entity, workspace, **kwargs
-                    )
-                else:
-                    prop = getattr(entity, alias, None)
-
-                    if prop is not None:
-                        kwargs[key] = prop
-
-        return kwargs
-
-
-class BaseContainerConversion(ABC, BaseConversion):
-    """
-    Abstract class of the conversion of entities and elements.
-    """
 
     @abstractmethod
     def from_omf(self, element, **kwargs) -> Entity | None:
@@ -213,8 +167,32 @@ class BaseContainerConversion(ABC, BaseConversion):
 
         return children
 
+    def collect_attributes(self, element, workspace, **kwargs):
+        with fetch_h5_handle(workspace):
+            for key, alias in self._attribute_map.items():
 
-class DataConversion(BaseContainerConversion):
+                if isinstance(alias, type(BaseConversion)):
+                    conversion = alias(  # pylint: disable=not-callable
+                        element, workspace, parent=self._parent
+                    )
+                    kwargs = conversion.collect_attributes(element, workspace, **kwargs)
+                else:
+                    if isinstance(element, UidModel):
+                        prop = getattr(element, key, None)
+                        label = alias
+                    else:
+                        prop = getattr(element, alias, None)
+                        label = key
+
+                    if prop is None:
+                        continue
+
+                    kwargs[label] = prop
+
+        return kwargs
+
+
+class DataConversion(BaseConversion):
     """
     Conversion between :obj:`omf.data.Data` and
     :obj:`geoh5py.data.Data`
@@ -226,9 +204,9 @@ class DataConversion(BaseContainerConversion):
     }
 
     def from_omf(self, element, **kwargs) -> Data | dict:
-        with fetch_h5_handle(self.geoh5):
+        with fetch_h5_handle(self.geoh5) as workspace:
 
-            kwargs = self.collect_omf_attributes(element, **kwargs)
+            kwargs = self.collect_attributes(element, workspace, **kwargs)
             parent = kwargs.pop("parent", None)
 
             if not isinstance(parent, ObjectBase):
@@ -253,7 +231,7 @@ class DataConversion(BaseContainerConversion):
     def from_geoh5(self, entity, **kwargs) -> UidModel | list:
         """Convert a geoh5 data to omf element."""
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_h5_attributes(entity, workspace, **kwargs)
+            kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
 
             if entity.association.name == "VERTEX":
@@ -268,7 +246,7 @@ class DataConversion(BaseContainerConversion):
         return element
 
 
-class ElementConversion(BaseContainerConversion):
+class ElementConversion(BaseConversion):
     """
     Conversion between :obj:`omf.pointset.PointSetElement` and
     :obj:`geoh5py.objects.Points`
@@ -289,7 +267,7 @@ class ElementConversion(BaseContainerConversion):
         """Convert omf element to geoh5 entity."""
         with fetch_h5_handle(self.geoh5) as workspace:
             try:
-                kwargs = self.collect_omf_attributes(element, **kwargs)
+                kwargs = self.collect_attributes(element, workspace, **kwargs)
             except OMFtoGeoh5NotImplemented as error:
                 warnings.warn(error.args[0])
                 return None
@@ -302,7 +280,7 @@ class ElementConversion(BaseContainerConversion):
     def from_geoh5(self, entity, **kwargs) -> UidModel:
         """Convert a geoh5 entity to omf element."""
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_h5_attributes(entity, workspace, **kwargs)
+            kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
             element = self.omf_type(**kwargs)
 
@@ -314,7 +292,7 @@ class ElementConversion(BaseContainerConversion):
         return element
 
 
-class ProjectConversion(BaseContainerConversion):
+class ProjectConversion(BaseConversion):
     """
     Conversion between a :obj:`omf.base.Project` and :obj:`geoh5py.groups.RootGroup`
     """
@@ -331,7 +309,7 @@ class ProjectConversion(BaseContainerConversion):
     def from_omf(self, element, **kwargs) -> RootGroup:
         """Convert omf project to geoh5 root."""
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_omf_attributes(element, **kwargs)
+            kwargs = self.collect_attributes(element, workspace, **kwargs)
             root: RootGroup = workspace.root
 
             for key, value in kwargs.items():
@@ -344,10 +322,10 @@ class ProjectConversion(BaseContainerConversion):
     def from_geoh5(self, entity, **kwargs) -> Project:
         """Convert RootGroup to omf Project."""
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_h5_attributes(entity, workspace, **kwargs)
+            kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
-            project._backend.update({"uid": uid})  # pylint: disable=W0212
+            getattr(project, "_backend").update({"uid": uid})  # pylint: disable=W0212
             project.elements = self.process_dependents(entity, project, workspace)
 
         return project
@@ -362,53 +340,57 @@ class ArrayConversion(BaseConversion):
     geoh5_type = Data
     _attribute_map: dict = {"array": "values"}
 
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
-        values = getattr(element, "array")
-        if values is not None:
+    def from_omf(self, element, **kwargs):
+        """Convert omf element to geoh5 entity."""
+        kwargs = self.collect_attributes(element, self.geoh5)
 
-            conversion = _VALUE_MAP.get(type(self._parent), None)
-            if conversion is not None:
-                values = conversion(self._parent, values)
-
-            kwargs.update({"values": values.copy()})
         return kwargs
 
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
-        with fetch_h5_handle(workspace):
-            values = getattr(entity, "values", None)
-            if values is not None:
+    def from_geoh5(self, entity, **kwargs):
+        """Generate an omf element from geoh5 attributes."""
+        kwargs = self.collect_attributes(entity, self.geoh5)
 
+        return kwargs
+
+    def collect_attributes(self, element, workspace, **kwargs) -> dict:
+        with fetch_h5_handle(workspace):
+            if isinstance(element, UidModel):
+                values = np.r_[getattr(element, "array")]
+            else:
+                values = getattr(element, "values", None)
+
+            if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
                 if conversion is not None:
                     values = conversion(self._parent, values)
 
-                kwargs.update({"array": values.copy()})
-        return kwargs
+                if isinstance(element, UidModel):
+                    kwargs.update({"values": values.copy()})
+                else:
+                    kwargs.update({"array": values.copy()})
+            return kwargs
 
 
-class IndicesConversion(BaseConversion):
+class IndicesConversion(ArrayConversion):
     """
     Conversion from :obj:`omf.data.Scalar` of indices to :obj:`numpy.ndarray`
     handling the conversion for 'unknown': -1 <-> 0
     """
 
-    omf_type = ScalarArray
-    geoh5_type = Data
-    _attribute_map: dict = {"array": "values"}
-
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
-        values = getattr(element, "array")
-        if values is not None:
-            kwargs.update({"values": (values + 1).astype(int)})
-        return kwargs
-
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
+    def collect_attributes(self, element, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
-            values = getattr(entity, "values", None)
+            if isinstance(element, UidModel):
+                values = np.r_[getattr(element, "array")]
+            else:
+                values = getattr(element, "values", None)
+
             if values is not None:
-                values = (values - 1).astype(int)
-                kwargs.update({"indices": values})
-        return kwargs
+                if isinstance(element, UidModel):
+                    kwargs.update({"values": (values + 1).astype(int)})
+                else:
+                    values = (values - 1).astype(int)
+                    kwargs.update({"indices": values})
+            return kwargs
 
 
 class StringArrayConversion(ArrayConversion):
@@ -419,46 +401,49 @@ class StringArrayConversion(ArrayConversion):
 
     omf_type = StringArray
     geoh5_type = list
-    _attribute_map: dict = {"array": "values"}
 
 
-class ReferenceMapConversion(BaseConversion):
+class ReferenceMapConversion(ArrayConversion):
 
     geoh5_type = ReferencedData
 
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
-        value_map = {count + 1: str(val) for count, val in enumerate(element[0].values)}
-        color_map = np.vstack(
-            [np.r_[count + 1, val, 1.0] for count, val in enumerate(element[1].values)]
-        )
-        kwargs["value_map"] = value_map
-        kwargs["type"] = "referenced"
-        kwargs["color_map"] = color_map
-        return kwargs
-
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
-        """Generate an omf element from geoh5 attributes."""
-        with fetch_h5_handle(workspace):
-            kwargs.update(
-                {
-                    "legends": [
-                        Legend(
-                            values=StringArray(
-                                array=list(entity.value_map.map.values())
-                            )
-                        ),
-                        Legend(
-                            values=ColorArray(
-                                array=entity.entity_type.color_map.values[1:-1, :]
-                                .astype(int)
-                                .reshape((-1, 3))
-                                .tolist()
-                            )
-                        ),
-                    ]
-                }
+    def collect_attributes(self, element, workspace, **kwargs) -> dict:
+        if hasattr(element, "legends"):
+            value_map = {
+                count + 1: str(val)
+                for count, val in enumerate(element.legends[0].values)
+            }
+            color_map = np.vstack(
+                [
+                    np.r_[count + 1, val, 1.0]
+                    for count, val in enumerate(element.legends[1].values)
+                ]
             )
-            return kwargs
+            kwargs["value_map"] = value_map
+            kwargs["type"] = "referenced"
+            kwargs["color_map"] = color_map
+        else:
+            with fetch_h5_handle(workspace):
+                kwargs.update(
+                    {
+                        "legends": [
+                            Legend(
+                                values=StringArray(
+                                    array=list(element.value_map.map.values())
+                                )
+                            ),
+                            Legend(
+                                values=ColorArray(
+                                    array=element.entity_type.color_map.values[1:-1, :]
+                                    .astype(int)
+                                    .reshape((-1, 3))
+                                    .tolist()
+                                )
+                            ),
+                        ]
+                    }
+                )
+        return kwargs
 
 
 class MappedDataConversion(DataConversion):
@@ -474,7 +459,7 @@ class MappedDataConversion(DataConversion):
     )
 
 
-class ColormapConversion(BaseConversion):
+class ColormapConversion(ArrayConversion):
     """
     Conversion from :obj:`omf.data.ColorMap` :obj:`numpy.ndarray`
     """
@@ -483,17 +468,32 @@ class ColormapConversion(BaseConversion):
     geoh5_type = Data
     _attribute_map: dict = {"colormap": "color_map"}
 
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
-        colors = np.vstack(element.gradient.array)
-        values = np.linspace(element.limits[0], element.limits[1], colors.shape[0])
+    def collect_attributes(self, element, workspace, **kwargs):
+        if isinstance(element, UidModel):
+            kwargs = self.collect_omf_attributes(element, **kwargs)
+        else:
+            kwargs = self.collect_h5_attributes(element, workspace, **kwargs)
+        return kwargs
+
+    @staticmethod
+    def collect_omf_attributes(element, **kwargs) -> dict:
+
+        colormap = getattr(element, "colormap", None)
+        if colormap is None:
+            return kwargs
+
+        colors = np.vstack(colormap.gradient.array)
+        values = np.linspace(colormap.limits[0], colormap.limits[1], colors.shape[0])
 
         kwargs["color_map"] = np.c_[values, colors, np.ones_like(values)]
         return kwargs
 
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
+    @staticmethod
+    def collect_h5_attributes(element, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
-            if getattr(entity.entity_type, "color_map", None) is not None:
-                cmap = entity.entity_type.color_map
+
+            if getattr(element.entity_type, "color_map", None) is not None:
+                cmap = element.entity_type.color_map
                 ind = np.argsort(cmap.values[0, :])
                 values = cmap.values[0, ind]
                 limits = [values[0], values[-1]]
@@ -531,19 +531,27 @@ class BaseGeometryConversion(BaseConversion):
     Base geometry operations.
     """
 
-    def collect_omf_attributes(self, element, **kwargs):
-        for key, alias in self._attribute_map.items():
-            kwargs[alias] = np.vstack(getattr(element, key))
-
+    def from_omf(self, element, **kwargs):
+        """Convert omf element to geoh5 entity."""
+        kwargs = self.collect_attributes(element, self.geoh5)
         return kwargs
 
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
-        with fetch_h5_handle(workspace):
-            geometry = {
-                key: getattr(entity, alias)
-                for key, alias in self._attribute_map.items()
-            }
-            kwargs.update({"geometry": geometry})
+    def from_geoh5(self, entity, **kwargs):
+        """Generate an omf element from geoh5 attributes."""
+        kwargs = self.collect_attributes(entity, self.geoh5)
+        return kwargs
+
+    def collect_attributes(self, element, workspace, **kwargs):
+        if hasattr(element, "geometry"):
+            for key, alias in self._attribute_map.items():
+                kwargs[alias] = np.vstack(getattr(element.geometry, key))
+        else:
+            with fetch_h5_handle(workspace):
+                geometry = {
+                    key: getattr(element, alias)
+                    for key, alias in self._attribute_map.items()
+                }
+                kwargs.update({"geometry": geometry})
 
         return kwargs
 
@@ -594,15 +602,23 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
         "v": "v",
     }
 
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
+    def collect_attributes(self, element, workspace, **kwargs):
+        if isinstance(element, SurfaceElement):
+            kwargs = self.collect_omf_attributes(element, **kwargs)
+        else:
+            kwargs = self.collect_h5_attributes(element, workspace, **kwargs)
+        return kwargs
+
+    @classmethod
+    def collect_omf_attributes(cls, element, **kwargs) -> dict:
         """Convert attributes from omf to geoh5."""
-        if element.axis_v[-1] != 0:
+        if element.geometry.axis_v[-1] != 0:
             raise OMFtoGeoh5NotImplemented(
                 f"{SurfaceGridGeometry} with 3D rotation axes."
             )
 
-        for key, alias in self._attribute_map.items():
-            tensor = getattr(element, f"tensor_{key}")
+        for key, alias in cls._attribute_map.items():
+            tensor = getattr(element.geometry, f"tensor_{key}")
             if len(np.unique(tensor)) > 1:
                 raise OMFtoGeoh5NotImplemented(
                     f"{SurfaceGridGeometry} with variable cell sizes along the {key} axis."
@@ -613,28 +629,35 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
             )
 
         azimuth = (
-            450 - np.rad2deg(np.arctan2(element.axis_v[1], element.axis_v[0]))
+            450
+            - np.rad2deg(
+                np.arctan2(element.geometry.axis_v[1], element.geometry.axis_v[0])
+            )
         ) % 360
 
         if azimuth != 0:
             kwargs.update({"rotation": azimuth})
 
-        if element.axis_u[-1] != 0:
+        if element.geometry.axis_u[-1] != 0:
             dip = np.rad2deg(
-                np.arcsin(element.axis_u[-1] / np.linalg.norm(element.axis_u))
+                np.arcsin(
+                    element.geometry.axis_u[-1]
+                    / np.linalg.norm(element.geometry.axis_u)
+                )
             )
             kwargs.update({"dip": dip})
 
-        if element.offset_w is not None:
+        if element.geometry.offset_w is not None:
             warnings.warn(
                 str(OMFtoGeoh5NotImplemented("Warped Grid2D with 'offset_w'."))
             )
         return kwargs
 
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
+    @classmethod
+    def collect_h5_attributes(cls, entity, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
             geometry = {}
-            for key, alias in self._attribute_map.items():
+            for key, alias in cls._attribute_map.items():
                 cell_size, count = getattr(entity, f"{alias}_cell_size"), getattr(
                     entity, f"{alias}_count"
                 )
@@ -657,7 +680,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
                 }
             )
             kwargs.update({"geometry": geometry})
-            return kwargs
+        return kwargs
 
 
 class VolumeGridGeometryConversion(BaseGeometryConversion):
@@ -675,32 +698,44 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
     ):
         super().__init__(obj, geoh5, parent=parent)
 
-    def collect_omf_attributes(self, element, **kwargs) -> dict:
-        if not np.allclose(np.cross(element.axis_w, [0, 0, 1]), [0, 0, 0]):
+    def collect_attributes(self, element, workspace, **kwargs):
+        if isinstance(element, VolumeElement):
+            kwargs = self.collect_omf_attributes(element, **kwargs)
+        else:
+            kwargs = self.collect_h5_attributes(element, workspace, **kwargs)
+        return kwargs
+
+    @classmethod
+    def collect_omf_attributes(cls, element, **kwargs) -> dict:
+        if not np.allclose(np.cross(element.geometry.axis_w, [0, 0, 1]), [0, 0, 0]):
             raise OMFtoGeoh5NotImplemented(
                 f"{VolumeGridGeometry} with 3D rotation axes."
             )
 
-        for key, alias in self._attribute_map.items():
-            tensor = getattr(element, f"tensor_{key}")
+        for key, alias in cls._attribute_map.items():
+            tensor = getattr(element.geometry, f"tensor_{key}")
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
 
         azimuth = (
-            450 - np.rad2deg(np.arctan2(element.axis_v[1], element.axis_v[0]))
+            450
+            - np.rad2deg(
+                np.arctan2(element.geometry.axis_v[1], element.geometry.axis_v[0])
+            )
         ) % 360
 
         if azimuth != 0:
             kwargs.update({"rotation": azimuth})
 
-        kwargs.update({"origin": np.r_[element.origin]})
+        kwargs.update({"origin": np.r_[element.geometry.origin]})
 
         return kwargs
 
-    def collect_h5_attributes(self, entity, workspace, **kwargs) -> dict:
+    @classmethod
+    def collect_h5_attributes(cls, entity, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
             geometry = {}
-            for key, alias in self._attribute_map.items():
+            for key, alias in cls._attribute_map.items():
                 cell_delimiter = getattr(entity, f"{alias}_cell_delimiters")
                 tensor = np.diff(cell_delimiter)
                 geometry.update({f"tensor_{key}": tensor})
@@ -721,7 +756,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 }
             )
             kwargs.update({"geometry": geometry})
-            return kwargs
+        return kwargs
 
 
 class PointsConversion(ElementConversion):
@@ -839,7 +874,8 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             order="C",
         )
         values = values.transpose((2, 0, 1))[::-1, :, :].flatten(order="F")
-
+        if values.dtype == float:
+            values[values == FLOAT_NDV] = np.nan
     else:
         values = values.reshape(
             (
@@ -850,6 +886,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             order="F",
         )[::-1, :, :]
         values = values.transpose((1, 2, 0)).flatten()
+        values[np.isnan(values)] = FLOAT_NDV
 
     return values
 
