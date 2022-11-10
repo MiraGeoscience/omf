@@ -7,7 +7,7 @@ def compare_elements(elem_a, elem_b):
     assert elem_a.name == elem_b.name
 
     if hasattr(elem_a, "geometry"):
-        for attr in elem_a.geometry._valid_locations:
+        for attr in getattr(elem_a.geometry, "_valid_locations"):
             if getattr(elem_a.geometry, attr, None) is not None:
                 testing.assert_allclose(
                     getattr(elem_a.geometry, attr).array,

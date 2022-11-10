@@ -1,7 +1,6 @@
 """Tests for PointSet validation"""
 
 import numpy as np
-import numpy.testing
 from geoh5py.workspace import Workspace
 
 import omf
@@ -9,7 +8,6 @@ import omf
 
 def test_pointset_to_geoh5(tmp_path):
     """Test pointset geometry validation"""
-    # color = Color("rando")
     colormap = omf.ColorArray(
         array=[
             tuple(row)
@@ -22,7 +20,6 @@ def test_pointset_to_geoh5(tmp_path):
             .tolist()
         ]
     )
-
     orig_pts = omf.PointSetElement(
         name="Random Points",
         description="Just random points",
