@@ -359,6 +359,9 @@ class ArrayConversion(BaseConversion):
 
                 if np.issubdtype(values.dtype, np.floating):
                     values[np.isclose(values, FLOAT_NDV)] = np.nan
+                    values = values.astype(np.float32)
+                else:
+                    values = values.astype(np.int32)
 
             else:
                 values = getattr(element, "values", None)
@@ -430,7 +433,7 @@ class ReferenceMapConversion(ArrayConversion):
 
     @staticmethod
     def collect_omf_attributes(element, **kwargs) -> dict:
-        if element.legends:
+        if not element.legends:
             return kwargs
 
         value_map = {
