@@ -10,7 +10,7 @@ import numpy as np
 from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
 from geoh5py.groups import RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
-from geoh5py.shared import FLOAT_NDV, Entity
+from geoh5py.shared import FLOAT_NDV, INTEGER_NDV, Entity
 from geoh5py.workspace import Workspace
 
 from omf.base import Project, UidModel
@@ -356,8 +356,10 @@ class ArrayConversion(BaseConversion):
         with fetch_h5_handle(workspace):
             if isinstance(element, UidModel):
                 values = np.r_[getattr(element, "array")]
+                values[np.isclose(values, FLOAT_NDV)] = np.nan
             else:
                 values = getattr(element, "values", None)
+                values[np.isnan(values)] = FLOAT_NDV
 
             if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
@@ -383,8 +385,13 @@ class IndicesConversion(ArrayConversion):
                 values = np.r_[getattr(element, "array")]
             else:
                 values = getattr(element, "values", None)
+                values[np.isclose(values, INTEGER_NDV)] = 0
 
             if values is not None:
+                conversion = _VALUE_MAP.get(type(self._parent), None)
+                if conversion is not None:
+                    values = conversion(self._parent, values)
+
                 if isinstance(element, UidModel):
                     kwargs.update({"values": (values + 1).astype(int)})
                 else:
@@ -407,42 +414,57 @@ class ReferenceMapConversion(ArrayConversion):
 
     geoh5_type = ReferencedData
 
-    def collect_attributes(self, element, workspace, **kwargs) -> dict:
-        if hasattr(element, "legends"):
-            value_map = {
-                count + 1: str(val)
-                for count, val in enumerate(element.legends[0].values)
-            }
-            color_map = np.vstack(
-                [
-                    np.r_[count + 1, val, 1.0]
-                    for count, val in enumerate(element.legends[1].values)
-                ]
-            )
-            kwargs["value_map"] = value_map
-            kwargs["type"] = "referenced"
-            kwargs["color_map"] = color_map
+    def collect_attributes(self, element, workspace, **kwargs):
+        if isinstance(element, MappedData):
+            kwargs = self.collect_omf_attributes(element, **kwargs)
         else:
-            with fetch_h5_handle(workspace):
-                kwargs.update(
-                    {
-                        "legends": [
-                            Legend(
-                                values=StringArray(
-                                    array=list(element.value_map.map.values())
-                                )
-                            ),
-                            Legend(
-                                values=ColorArray(
-                                    array=element.entity_type.color_map.values[1:-1, :]
-                                    .astype(int)
-                                    .reshape((-1, 3))
-                                    .tolist()
-                                )
-                            ),
-                        ]
-                    }
-                )
+            kwargs = self.collect_h5_attributes(element, workspace, **kwargs)
+        return kwargs
+
+    @staticmethod
+    def collect_omf_attributes(element, **kwargs) -> dict:
+        if element.legends:
+            return kwargs
+
+        value_map = {
+            count + 1: str(val) for count, val in enumerate(element.legends[0].values)
+        }
+        color_map = np.vstack(
+            [
+                np.r_[count + 1, val, 1.0]
+                for count, val in enumerate(element.legends[1].values)
+            ]
+        )
+        kwargs["value_map"] = value_map
+        kwargs["type"] = "referenced"
+        kwargs["color_map"] = color_map
+
+        return kwargs
+
+    @staticmethod
+    def collect_h5_attributes(element, workspace, **kwargs) -> dict:
+        with fetch_h5_handle(workspace):
+            labels = list(element.value_map.map.values())
+            ind = 0
+            if "Unknown" in labels:
+                ind = 1
+                labels.remove("Unknown")
+
+            kwargs.update(
+                {
+                    "legends": [
+                        Legend(values=StringArray(array=labels)),
+                        Legend(
+                            values=ColorArray(
+                                array=element.entity_type.color_map.values[1:-1, ind:]
+                                .astype(int)
+                                .reshape((3, -1))
+                                .T.tolist()
+                            )
+                        ),
+                    ]
+                }
+            )
         return kwargs
 
 
@@ -477,7 +499,6 @@ class ColormapConversion(ArrayConversion):
 
     @staticmethod
     def collect_omf_attributes(element, **kwargs) -> dict:
-
         colormap = getattr(element, "colormap", None)
         if colormap is None:
             return kwargs
@@ -519,6 +540,9 @@ class ColormapConversion(ArrayConversion):
 
 
 class ScalarDataConversion(DataConversion):
+    """
+    Base conversion for numerical data.
+    """
 
     omf_type = ScalarData
     geoh5_type = FloatData
@@ -661,12 +685,12 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
                 cell_size, count = getattr(entity, f"{alias}_cell_size"), getattr(
                     entity, f"{alias}_count"
                 )
-                tensor = np.ones(count) * cell_size
+                tensor = np.ones(count) * np.abs(cell_size)
                 geometry.update({f"tensor_{key}": tensor})
 
             if entity.rotation is not None or entity.dip is not None:
                 dip = np.deg2rad(getattr(entity, "dip", 0.0))
-                azm = np.deg2rad(getattr(entity, "azimuth", 0.0))
+                azm = np.deg2rad(getattr(entity, "rotation", 0.0))
                 rot = rotation_opt(azm, dip)
 
                 geometry["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
@@ -735,10 +759,12 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
     def collect_h5_attributes(cls, entity, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
             geometry = {}
+            offsets = []
             for key, alias in cls._attribute_map.items():
                 cell_delimiter = getattr(entity, f"{alias}_cell_delimiters")
                 tensor = np.diff(cell_delimiter)
-                geometry.update({f"tensor_{key}": tensor})
+                offsets.append(np.sum(tensor[tensor < 0]))
+                geometry.update({f"tensor_{key}": np.abs(tensor)})
 
             if entity.rotation is not None:
 
@@ -751,7 +777,9 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             geometry.update(
                 {
                     "origin": np.r_[
-                        entity.origin["x"], entity.origin["y"], entity.origin["z"]
+                        entity.origin["x"] + offsets[0],
+                        entity.origin["y"] + offsets[1],
+                        entity.origin["z"] + offsets[2],
                     ]
                 }
             )
@@ -874,8 +902,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             order="C",
         )
         values = values.transpose((2, 0, 1))[::-1, :, :].flatten(order="F")
-        if values.dtype == float:
-            values[values == FLOAT_NDV] = np.nan
+
     else:
         values = values.reshape(
             (
@@ -886,7 +913,6 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             order="F",
         )[::-1, :, :]
         values = values.transpose((1, 2, 0)).flatten()
-        values[np.isnan(values)] = FLOAT_NDV
 
     return values
 
