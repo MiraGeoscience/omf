@@ -140,8 +140,6 @@ class BaseConversion(ABC):
         "uid": "uid",
         "name": "name",
     }
-    _element = None
-    _entity = None
     _parent = None
     _mapping = None
 
