@@ -35,6 +35,12 @@ the `Global Mining Standards & Guidelines Group <http://www.globalminingstandard
     backward-incompatible ways and are not subject to any SLA or deprecation
     policy.
 
+.. warning::
+    **Alpha-Release Notice**
+
+    This is a fork created by Mira Geoscience for interoperability with the
+    geoh5 file format.
+
 Why?
 ----
 
@@ -68,6 +74,9 @@ Connections
 This library makes use of the `properties <https://github.com/seequent/properties>`_
 open-source project, which is designed and publicly supported by
 `Seequent <https://seequent.com>`_.
+
+Connection to the geoh5 format makes use of `geoh5py <https://geoh5py.readthedocs.io/>`_
+publicly supported by `Mira Geoscience <https://mirageoscience.com/>`_
 
 Installation
 ------------
