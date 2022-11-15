@@ -2,7 +2,7 @@ omf
 ***
 
 .. image:: https://img.shields.io/pypi/v/omf.svg
-    :target: https://pypi.python.org/pypi/omf
+    :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
 .. image:: https://readthedocs.org/projects/omf/badge/?version=latest
@@ -10,12 +10,8 @@ omf
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/GMSGDataExchange/omf/blob/master/LICENSE
+    :target: https://github.com/MiraGeoscience/omf/blob/develop/LICENSE
     :alt: MIT license
-
-.. image:: https://travis-ci.org/GMSGDataExchange/omf.svg?branch=master
-    :target: https://travis-ci.org/GMSGDataExchange/omf
-    :alt: Travis tests
 
 .. image:: https://codecov.io/gh/GMSGDataExchange/omf/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/GMSGDataExchange/omf
