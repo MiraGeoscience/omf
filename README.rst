@@ -5,8 +5,8 @@ omf
     :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
-.. image:: https://readthedocs.org/projects/omf/badge/?version=latest
-    :target: http://omf.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/omf/badge/?version=stable
+    :target: http://omf.readthedocs.io/en/stable/
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
