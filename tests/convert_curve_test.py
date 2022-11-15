@@ -38,3 +38,8 @@ def test_lineset_to_geoh5(tmp_path):
 
         data = curve.get_entity("rand segment data")[0]
         np.testing.assert_array_almost_equal(np.r_[line.data[1].array], data.values)
+
+    project = omf.fileio.geoh5.GeoH5Reader(file).project
+    omf_line = project.elements[0]
+
+    omf.fileio.utils.compare_elements(omf_line, line)
