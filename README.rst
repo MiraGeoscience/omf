@@ -13,9 +13,9 @@ omf
     :target: https://github.com/MiraGeoscience/omf/blob/develop/LICENSE
     :alt: MIT license
 
-.. image:: https://codecov.io/gh/GMSGDataExchange/omf/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/GMSGDataExchange/omf
-    :alt: Code coverage
+.. image:: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml/badge.svg
+    :target: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml
+    :alt: pytest
 
 
 Version: 0.9.3
