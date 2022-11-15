@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "omf"
-version = "3.0.0-alpha"
+name = "mira-omf"
+version = "3.0.0-alpha.1"
 description = "API Library for Open Mining Format"
 authors = [
     "Mira Geoscience <dominiquef@mirageoscience.com>",
@@ -21,6 +21,10 @@ classifiers = [
     'Operating System :: Unix',
     'Operating System :: MacOS',
     'Natural Language :: English',
+]
+
+packages = [
+    { include = "omf" },
 ]
 
 [tool.poetry.dependencies]
