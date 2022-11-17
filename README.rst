@@ -2,24 +2,20 @@ omf
 ***
 
 .. image:: https://img.shields.io/pypi/v/omf.svg
-    :target: https://pypi.python.org/pypi/omf
+    :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
-.. image:: https://readthedocs.org/projects/omf/badge/?version=latest
-    :target: http://omf.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/omf/badge/?version=stable
+    :target: http://omf.readthedocs.io/en/stable/
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/GMSGDataExchange/omf/blob/master/LICENSE
+    :target: https://github.com/MiraGeoscience/omf/blob/develop/LICENSE
     :alt: MIT license
 
-.. image:: https://travis-ci.org/GMSGDataExchange/omf.svg?branch=master
-    :target: https://travis-ci.org/GMSGDataExchange/omf
-    :alt: Travis tests
-
-.. image:: https://codecov.io/gh/GMSGDataExchange/omf/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/GMSGDataExchange/omf
-    :alt: Code coverage
+.. image:: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml/badge.svg
+    :target: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml
+    :alt: pytest
 
 
 Version: 0.9.3
@@ -34,6 +30,12 @@ the `Global Mining Standards & Guidelines Group <http://www.globalminingstandard
     Python API. The storage format and libraries might be changed in
     backward-incompatible ways and are not subject to any SLA or deprecation
     policy.
+
+.. warning::
+    **Alpha-Release Notice**
+
+    This is a fork created by Mira Geoscience for interoperability with the
+    geoh5 file format.
 
 Why?
 ----
@@ -68,6 +70,9 @@ Connections
 This library makes use of the `properties <https://github.com/seequent/properties>`_
 open-source project, which is designed and publicly supported by
 `Seequent <https://seequent.com>`_.
+
+Connection to the geoh5 format makes use of `geoh5py <https://geoh5py.readthedocs.io/>`_
+publicly supported by `Mira Geoscience <https://mirageoscience.com/>`_
 
 Installation
 ------------
