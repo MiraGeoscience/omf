@@ -28,16 +28,21 @@ def test_surface_to_geoh5(tmp_path):
     omf.OMFWriter(surf, file)
 
     with Workspace(file) as workspace:
-        curve = workspace.get_entity("trisurf")[0]
+        geoh5_surf = workspace.get_entity("trisurf")[0]
         np.testing.assert_array_almost_equal(
-            np.r_[surf.geometry.vertices.array], curve.vertices
+            np.r_[surf.geometry.vertices.array], geoh5_surf.vertices
         )
 
-        data = curve.get_entity("rand vert data")[0]
+        data = geoh5_surf.get_entity("rand vert data")[0]
         np.testing.assert_array_almost_equal(np.r_[surf.data[0].array], data.values)
 
-        data = curve.get_entity("rand face data")[0]
+        data = geoh5_surf.get_entity("rand face data")[0]
         np.testing.assert_array_almost_equal(np.r_[surf.data[1].array], data.values)
+
+        converter = omf.fileio.geoh5.get_conversion_map(geoh5_surf, workspace)
+        converted_omf = converter.from_geoh5(geoh5_surf)
+
+    omf.fileio.utils.compare_elements(converted_omf, surf)
 
     project = omf.fileio.geoh5.GeoH5Reader(file).project
     omf_surf = project.elements[0]
