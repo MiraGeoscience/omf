@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mira-omf"
-version = "3.0.0-alpha.3"
+version = "3.0.0-alpha.4"
 description = "API Library for Open Mining Format"
 authors = [
     "Mira Geoscience <dominiquef@mirageoscience.com>",
