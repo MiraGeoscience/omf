@@ -10,7 +10,7 @@ omf
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/MiraGeoscience/omf/blob/develop/LICENSE
+    :target: https://github.com/MiraGeoscience/omf/blob/main/LICENSE
     :alt: MIT license
 
 .. image:: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml/badge.svg
