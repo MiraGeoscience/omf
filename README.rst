@@ -1,7 +1,7 @@
 omf
 ***
 
-.. image:: https://img.shields.io/pypi/v/omf.svg
+.. image:: https://img.shields.io/pypi/v/mira-omf.svg
     :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
