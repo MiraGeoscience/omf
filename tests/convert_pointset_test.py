@@ -38,13 +38,18 @@ def test_pointset_to_geoh5(tmp_path):
     omf.OMFWriter(orig_pts, file)
 
     with Workspace(file) as workspace:
-        points = workspace.get_entity("Random Points")[0]
+        geoh5_points = workspace.get_entity("Random Points")[0]
         np.testing.assert_array_almost_equal(
-            np.r_[orig_pts.geometry.vertices.array], points.vertices
+            np.r_[orig_pts.geometry.vertices.array], geoh5_points.vertices
         )
 
-        data = points.get_entity("rand data")[0]
+        data = geoh5_points.get_entity("rand data")[0]
         np.testing.assert_array_almost_equal(np.r_[orig_pts.data[0].array], data.values)
+
+        converter = omf.fileio.geoh5.get_conversion_map(geoh5_points, workspace)
+        converted_omf = converter.from_geoh5(geoh5_points)
+
+    omf.fileio.utils.compare_elements(converted_omf, orig_pts)
 
     project = omf.fileio.geoh5.GeoH5Reader(file).project
     omf_pts = project.elements[0]

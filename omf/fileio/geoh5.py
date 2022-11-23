@@ -643,10 +643,12 @@ class BaseGeometryConversion(BaseConversion):
                 kwargs[alias] = np.vstack(getattr(element.geometry, key))
         else:
             with fetch_h5_handle(workspace):
-                geometry = {
-                    key: getattr(element, alias)
-                    for key, alias in self._attribute_map.items()
-                }
+                geometry = self.omf_type(
+                    **{
+                        key: getattr(element, alias)
+                        for key, alias in self._attribute_map.items()
+                    }
+                )
                 kwargs.update({"geometry": geometry})
 
         return kwargs

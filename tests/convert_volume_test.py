@@ -61,6 +61,11 @@ def test_volume_to_geoh5(tmp_path):
             np.r_[vol.data[0].array], block_model_reordering(block_model, data.values)
         )
 
+        converter = omf.fileio.geoh5.get_conversion_map(block_model, workspace)
+        converted_omf = converter.from_geoh5(block_model)
+
+    omf.fileio.utils.compare_elements(converted_omf, vol)
+
     project = omf.fileio.geoh5.GeoH5Reader(file)()
     omf_vol = project.elements[0]
 
