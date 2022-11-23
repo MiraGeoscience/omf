@@ -41,6 +41,7 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 sphinx = "^5.3"
+toml = "^0.10.2"
 
 [tool.isort]
 # settings for compatibility between ``isort`` and ``black`` formatting
@@ -51,7 +52,7 @@ use_parentheses = true
 line_length = 88
 # auto-updated by seed-isort-config
 
-known_third_party = ["docutils", "geoh5py", "numpy", "properties", "pytest", "six", "sphinx"]
+known_third_party = ["docutils", "geoh5py", "numpy", "properties", "pytest", "six", "sphinx", "toml"]
 
 [tool.black]
 # defaults are just fine
