@@ -1,7 +1,7 @@
 omf
 ***
 
-.. image:: https://img.shields.io/pypi/v/omf.svg
+.. image:: https://img.shields.io/pypi/v/mira-omf.svg
     :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
@@ -10,7 +10,7 @@ omf
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/MiraGeoscience/omf/blob/develop/LICENSE
+    :target: https://github.com/MiraGeoscience/omf/blob/main/LICENSE
     :alt: MIT license
 
 .. image:: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml/badge.svg
@@ -18,7 +18,7 @@ omf
     :alt: pytest
 
 
-Version: 0.9.3
+Version: 3.0.0-alpha.4
 
 API library for Open Mining Format, a new standard for mining data backed by
 the `Global Mining Standards & Guidelines Group <http://www.globalminingstandards.org/>`_.
