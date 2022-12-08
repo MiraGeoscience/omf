@@ -7,7 +7,7 @@ from omf.fileio.geoh5 import GeoH5Writer
 
 def run():
     omf_filepath = Path(sys.argv[1])
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         output_filepath = omf_filepath.with_suffix(".geoh5")
     else:
         output_filepath = Path(sys.argv[2])
