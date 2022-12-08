@@ -56,7 +56,7 @@ use_parentheses = true
 line_length = 88
 # auto-updated by seed-isort-config
 
-known_third_party = ["docutils", "geoh5py", "numpy", "properties", "pytest", "six", "sphinx", "toml"]
+known_third_party = ["docutils", "geoh5py", "numpy", "properties", "six", "sphinx", "toml"]
 
 [tool.black]
 # defaults are just fine
