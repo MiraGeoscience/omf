@@ -30,3 +30,31 @@ __version__ = "3.0.0-alpha.4"
 __author__ = "Global Mining Standards and Guidelines Group"
 __license__ = "MIT License"
 __copyright__ = "Copyright 2017 Global Mining Standards and Guidelines Group"
+
+
+def _create_logger():
+    import logging
+    import sys
+
+    error_handler = logging.StreamHandler(sys.stderr)
+    error_handler.setLevel(logging.ERROR)
+    ok_handler = logging.StreamHandler(sys.stdout)
+    ok_handler.setLevel(logging.DEBUG)
+
+    logger = logging.getLogger(__package__)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(ok_handler)
+    logger.addHandler(error_handler)
+
+    formatter = logging.Formatter("[%(levelname)s] %(message)s")
+    error_handler.setFormatter(formatter)
+    ok_handler.setFormatter(formatter)
+
+    class OkFilter(logging.Filter):
+        def filter(self, record):
+            return record.levelno < logging.ERROR
+
+    ok_handler.addFilter(OkFilter())
+
+
+_create_logger()
