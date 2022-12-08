@@ -46,7 +46,7 @@ class OMFtoGeoh5NotImplemented(NotImplementedError):
     @staticmethod
     def message(info):
         """Custom error message."""
-        return f"Cannot perform the conversion from OMF to geoh5. {info}"
+        return f"Conversion from OMF to geoh5 not implemented: {info}"
 
 
 class GeoH5Writer:  # pylint: disable=too-few-public-methods
@@ -93,9 +93,7 @@ def get_conversion_map(
     :returns: A sub-class of BaseConversion for the provided element.
     """
     if type(element) not in _CONVERSION_MAP:
-        raise OMFtoGeoh5NotImplemented(
-            f"Element of type {type(element)} currently not implemented."
-        )
+        raise OMFtoGeoh5NotImplemented(f"element of type {type(element)}.")
 
     # Special case for SurfaceElement describing Grid2D
     if isinstance(element, SurfaceElement) and isinstance(
@@ -191,7 +189,7 @@ class BaseConversion(ABC):
                 converter = get_conversion_map(child, workspace, parent=element)
                 children += [getattr(converter, method)(child, **kwargs)]
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(error.args[0])
+                warnings.warn(str(error))
                 continue
 
         return children
@@ -322,7 +320,7 @@ class ElementConversion(BaseConversion):
             try:
                 kwargs = self.collect_attributes(element, workspace, **kwargs)
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(error.args[0])
+                warnings.warn(str(error))
                 return None
 
             entity = workspace.create_entity(self.geoh5_type, **{"entity": kwargs})
@@ -747,7 +745,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
 
         if element.geometry.offset_w is not None:
             warnings.warn(
-                str(OMFtoGeoh5NotImplemented("Warped Grid2D with 'offset_w'."))
+                str(OMFtoGeoh5NotImplemented("warped Grid2D with 'offset_w'."))
             )
         return kwargs
 
