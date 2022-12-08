@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-import warnings
+import logging
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from pathlib import Path
@@ -32,6 +32,8 @@ from omf.lineset import LineSetElement, LineSetGeometry
 from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from omf.volume import VolumeElement, VolumeGridGeometry
+
+_logger = logging.getLogger(__package__)
 
 
 class OMFtoGeoh5NotImplemented(NotImplementedError):
@@ -189,7 +191,7 @@ class BaseConversion(ABC):
                 converter = get_conversion_map(child, workspace, parent=element)
                 children += [getattr(converter, method)(child, **kwargs)]
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(str(error))
+                _logger.warning(str(error))
                 continue
 
         return children
@@ -320,7 +322,7 @@ class ElementConversion(BaseConversion):
             try:
                 kwargs = self.collect_attributes(element, workspace, **kwargs)
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(str(error))
+                _logger.warning(str(error))
                 return None
 
             entity = workspace.create_entity(self.geoh5_type, **{"entity": kwargs})
@@ -744,7 +746,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
             kwargs.update({"dip": dip})
 
         if element.geometry.offset_w is not None:
-            warnings.warn(
+            _logger.warning(
                 str(OMFtoGeoh5NotImplemented("warped Grid2D with 'offset_w'."))
             )
         return kwargs
