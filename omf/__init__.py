@@ -1,5 +1,8 @@
 """omf: API library for Open Mining Format file interchange format"""
 
+import logging
+import sys
+
 from .base import Project
 from .data import (
     ColorArray,
@@ -33,9 +36,6 @@ __copyright__ = "Copyright 2017 Global Mining Standards and Guidelines Group"
 
 
 def _create_logger():
-    import logging
-    import sys
-
     error_handler = logging.StreamHandler(sys.stderr)
     error_handler.setLevel(logging.ERROR)
     ok_handler = logging.StreamHandler(sys.stdout)

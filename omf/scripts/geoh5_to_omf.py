@@ -18,13 +18,13 @@ def run():
             output_filepath = output_filepath.with_suffix(".omf")
     if output_filepath.exists():
         _logger.error(
-            f"Cowardly refuses to overwrite existing file '{output_filepath}'."
+            "Cowardly refuses to overwrite existing file '%s'.", output_filepath
         )
-        exit(1)
+        sys.exit(1)
 
     reader = GeoH5Reader(geoh5_filepath)
     OMFWriter(reader(), str(output_filepath.absolute()))
-    _logger.info(f"OMF file created: {output_filepath}")
+    _logger.info("OMF file created: %s", output_filepath)
 
 
 if __name__ == "__main__":
