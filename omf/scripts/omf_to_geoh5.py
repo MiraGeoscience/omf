@@ -11,7 +11,7 @@ def run():
         output_filepath = omf_filepath.with_suffix(".geoh5")
     else:
         output_filepath = Path(sys.argv[2])
-    reader = OMFReader(omf_filepath.absolute())
+    reader = OMFReader(str(omf_filepath.absolute()))
     GeoH5Writer(reader.get_project(), output_filepath)
 
 

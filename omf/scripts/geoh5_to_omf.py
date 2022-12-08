@@ -12,7 +12,7 @@ def run():
     else:
         output_filepath = Path(sys.argv[2])
     reader = GeoH5Reader(geoh5_filepath)
-    OMFWriter(reader(), output_filepath)
+    OMFWriter(reader(), str(output_filepath.absolute()))
 
 
 if __name__ == "__main__":
