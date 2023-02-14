@@ -265,6 +265,9 @@ class DataConversion(BaseConversion):
             else:
                 kwargs["association"] = "VERTEX"
 
+            # if isinstance(parent, BlockModel) and "values" in kwargs:
+            #     kwargs["values"] = kwargs["values"].reshape(parent.shape)[:, :, ::-1].flatten()
+            #
             colormap = kwargs.pop("color_map", None)
             entity = parent.add_data({element.name: kwargs})
 
@@ -988,7 +991,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             ),
             order="C",
         )
-        values = values.transpose((2, 0, 1))[::-1, :, :].flatten(order="F")
+        values = values.transpose((2, 0, 1)).flatten(order="F")
 
     else:
         values = values.reshape(
@@ -998,7 +1001,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
                 entity.shape[1],
             ),
             order="F",
-        )[::-1, :, :]
+        )
         values = values.transpose((1, 2, 0)).flatten()
 
     return values
