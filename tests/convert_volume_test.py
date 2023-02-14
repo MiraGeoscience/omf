@@ -70,3 +70,27 @@ def test_volume_to_geoh5(tmp_path):
     omf_vol = project.elements[0]
 
     omf.fileio.utils.compare_elements(omf_vol, vol)
+
+
+def test_volume_flip_origin_z(tmp_path):
+
+    dims = [10, 15, 20]
+    vol = omf.VolumeElement(
+        name="vol",
+        geometry=omf.VolumeGridGeometry(
+            tensor_u=np.ones(dims[0]).astype(float),
+            tensor_v=np.ones(dims[1]).astype(float),
+            tensor_w=np.ones(dims[2]).astype(float),
+            axis_w=np.r_[0, 0, -1],
+            origin=[10.0, 10.0, -10],
+        )
+    )
+
+    file = str(tmp_path / "block_model.geoh5")
+    omf.OMFWriter(vol, file)
+
+    with Workspace(file) as workspace:
+        block_model = workspace.get_entity("vol")[0]
+
+        assert block_model.z_cell_delimiters[-1] < 0
+        assert block_model.origin['z'] == vol.geometry.origin[2]

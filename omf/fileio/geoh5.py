@@ -818,6 +818,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
 
+        kwargs["z_cell_delimiters"] = kwargs["z_cell_delimiters"] * element.geometry.axis_w[-1]
         azimuth = (
             450
             - np.rad2deg(
@@ -851,12 +852,15 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 geometry["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
                 geometry["axis_v"] = rot.dot(np.c_[0.0, 1.0, 0.0].T).flatten()
 
+            if getattr(entity, "z_cell_delimiters")[-1] < 0:
+                geometry["axis_w"] = np.r_[0, 0, -1]
+
             geometry.update(
                 {
                     "origin": np.r_[
                         entity.origin["x"] + offsets[0],
                         entity.origin["y"] + offsets[1],
-                        entity.origin["z"] + offsets[2],
+                        entity.origin["z"],
                     ]
                 }
             )
