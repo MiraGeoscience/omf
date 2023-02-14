@@ -1,13 +1,14 @@
 """Tests for PointSet validation"""
 
+import logging
+
 import numpy as np
-import pytest
 from geoh5py.workspace import Workspace
 
 import omf
 
 
-def test_grid2d_to_geoh5(tmp_path):
+def test_grid2d_to_geoh5(tmp_path, caplog):
     """Test pointset geometry validation"""
     grid = omf.SurfaceElement(
         name="gridsurf",
@@ -34,8 +35,9 @@ def test_grid2d_to_geoh5(tmp_path):
     )
     file = str(tmp_path / "grid2d.geoh5")
 
-    with pytest.warns(UserWarning):
-        omf.OMFWriter(grid, file)
+    omf.OMFWriter(grid, file)
+    warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warning_records) == 1
 
     with Workspace(file) as workspace:
         grid2d = workspace.get_entity("gridsurf")[0]
