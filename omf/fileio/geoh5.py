@@ -60,7 +60,6 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, element: UidModel, file_name: str | Path):
-
         if not isinstance(file_name, (str, Path)):
             raise TypeError("Input 'file' must be of str or Path.")
 
@@ -114,7 +113,6 @@ class GeoH5Reader:  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, file_name: str | Path):
-
         with Workspace(file_name, mode="r") as workspace:
             self.file = workspace
             converter = ProjectConversion(workspace.root, self.file)
@@ -209,7 +207,6 @@ class BaseConversion(ABC):
 
         with fetch_h5_handle(workspace):
             for key, alias in self._attribute_map.items():
-
                 if inspect.isclass(alias) and issubclass(alias, BaseConversion):
                     conversion = alias(  # pylint: disable=not-callable
                         element, workspace, parent=self._parent
@@ -250,7 +247,6 @@ class DataConversion(BaseConversion):
         """
 
         with fetch_h5_handle(self.geoh5) as workspace:
-
             kwargs = self.collect_attributes(element, workspace, **kwargs)
             parent = kwargs.pop("parent", None)
 
@@ -587,7 +583,6 @@ class ColormapConversion(ArrayConversion):
     @staticmethod
     def collect_h5_attributes(element, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
-
             if getattr(element.entity_type, "color_map", None) is not None:
                 cmap = element.entity_type.color_map
                 ind = np.argsort(cmap.values[0, :])
@@ -818,7 +813,9 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
 
-        kwargs["z_cell_delimiters"] = kwargs["z_cell_delimiters"] * element.geometry.axis_w[-1]
+        kwargs["z_cell_delimiters"] = (
+            kwargs["z_cell_delimiters"] * element.geometry.axis_w[-1]
+        )
         azimuth = (
             450
             - np.rad2deg(
@@ -845,7 +842,6 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 geometry.update({f"tensor_{key}": np.abs(tensor)})
 
             if entity.rotation is not None:
-
                 azm = np.deg2rad(getattr(entity, "rotation", 0.0))
                 rot = rotation_opt(azm, 0.0)
 

@@ -73,7 +73,6 @@ def test_volume_to_geoh5(tmp_path):
 
 
 def test_volume_flip_origin_z(tmp_path):
-
     dims = [10, 15, 20]
     vol = omf.VolumeElement(
         name="vol",
@@ -83,7 +82,7 @@ def test_volume_flip_origin_z(tmp_path):
             tensor_w=np.ones(dims[2]).astype(float),
             axis_w=np.r_[0, 0, -1],
             origin=[10.0, 10.0, -10],
-        )
+        ),
     )
 
     file = str(tmp_path / "block_model.geoh5")
@@ -93,4 +92,4 @@ def test_volume_flip_origin_z(tmp_path):
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert block_model.origin['z'] == vol.geometry.origin[2]
+        assert block_model.origin["z"] == vol.geometry.origin[2]
