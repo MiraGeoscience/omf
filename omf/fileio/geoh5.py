@@ -710,9 +710,9 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
     @classmethod
     def collect_omf_attributes(cls, element, **kwargs) -> dict:
         """Convert attributes from omf to geoh5."""
-        if element.geometry.axis_v[-1] != 0:
+        if element.geometry.axis_u[-1] != 0:
             raise OMFtoGeoh5NotImplemented(
-                f"{SurfaceGridGeometry} with 3D rotation axes."
+                f"{SurfaceGridGeometry} with 3D rotation axes: u-axis must be ont the XY plane."
             )
 
         for key, alias in cls._attribute_map.items():
@@ -726,21 +726,18 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
                 {f"{alias}_cell_size": tensor[0], f"{alias}_count": len(tensor)}
             )
 
-        azimuth = (
-            450
-            - np.rad2deg(
-                np.arctan2(element.geometry.axis_v[1], element.geometry.axis_v[0])
-            )
-        ) % 360
+        azimuth = np.rad2deg(
+                np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
+        )
 
         if azimuth != 0:
             kwargs.update({"rotation": azimuth})
 
-        if element.geometry.axis_u[-1] != 0:
+        if element.geometry.axis_v[-1] != 0:
             dip = np.rad2deg(
                 np.arcsin(
-                    element.geometry.axis_u[-1]
-                    / np.linalg.norm(element.geometry.axis_u)
+                    element.geometry.axis_v[-1]
+                    / np.linalg.norm(element.geometry.axis_v)
                 )
             )
             kwargs.update({"dip": dip})
