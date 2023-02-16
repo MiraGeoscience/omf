@@ -707,7 +707,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
         """Convert attributes from omf to geoh5."""
         if element.geometry.axis_u[-1] != 0:
             raise OMFtoGeoh5NotImplemented(
-                f"{SurfaceGridGeometry} with 3D rotation axes: u-axis must be ont the XY plane."
+                f"{SurfaceGridGeometry} with 3D rotation axes: u-axis must be on the XY plane."
             )
 
         for key, alias in cls._attribute_map.items():
