@@ -812,7 +812,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
         for key, alias in cls._attribute_map.items():
             tensor = getattr(element.geometry, f"tensor_{key}")
             axis = getattr(element.geometry, f"axis_{key}")
-            offsets.append(axis * tensor[0] / 2.)
+            offsets.append(axis * tensor[0] / 2.0)
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
         offsets = np.c_[offsets].sum(axis=1)
@@ -820,11 +820,11 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             kwargs["z_cell_delimiters"] * element.geometry.axis_w[-1]
         )
         rotation = np.rad2deg(
-                np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
+            np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
         )
         kwargs.update({"rotation": rotation})
         kwargs.update({"origin": np.r_[element.geometry.origin] - offsets})
-        
+
         return kwargs
 
     @classmethod
@@ -835,7 +835,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             for key, alias in cls._attribute_map.items():
                 cell_delimiter = getattr(entity, f"{alias}_cell_delimiters")
                 tensor = np.diff(cell_delimiter)
-                axis.append((-1)**(cell_delimiter.sum() < 0))
+                axis.append((-1) ** (cell_delimiter.sum() < 0))
                 geometry.update({f"tensor_{key}": np.abs(tensor)})
 
             azm = np.deg2rad(getattr(entity, "rotation", 0.0))
@@ -847,7 +847,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             offsets = []
             for key in cls._attribute_map:
                 offsets.append(
-                    geometry[f"axis_{key}"] * geometry[f"tensor_{key}"][0] / 2.
+                    geometry[f"axis_{key}"] * geometry[f"tensor_{key}"][0] / 2.0
                 )
 
             offsets = np.c_[offsets].sum(axis=1)
