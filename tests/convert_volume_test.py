@@ -1,6 +1,7 @@
 """Tests for PointSet validation"""
 
 import numpy as np
+from geoh5py.objects import BlockModel
 from geoh5py.workspace import Workspace
 
 import omf
@@ -92,4 +93,29 @@ def test_volume_flip_origin_z(tmp_path):
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert block_model.origin["z"] == vol.geometry.origin[2]
+        assert (
+            block_model.origin["z"]
+            == vol.geometry.origin[2] + vol.geometry.tensor_w[0] / 2
+        )
+
+    with Workspace(file) as workspace:
+        rotation = np.random.normal(-180, 180, 1)
+        block = BlockModel.create(
+            workspace,
+            origin=[0, 0, 0],
+            u_cell_delimiters=np.arange(0, 11) * 2.5,
+            v_cell_delimiters=np.arange(0, 22) * 3.6,
+            z_cell_delimiters=np.arange(0, 33) * 4.7,
+            rotation=rotation,
+        )
+
+        converter = omf.fileio.geoh5.get_conversion_map(block, workspace)
+        converted_omf = converter.from_geoh5(block)
+
+        with Workspace(file=str(tmp_path / "block_model_converted.geoh5")) as out_ws:
+            converter = omf.fileio.geoh5.get_conversion_map(converted_omf, out_ws)
+            converted_geoh5 = converter.from_omf(converted_omf)
+
+            np.testing.assert_array_almost_equal(
+                block.centroids, converted_geoh5.centroids
+            )
