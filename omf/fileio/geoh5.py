@@ -741,6 +741,10 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
             _logger.warning(
                 str(OMFtoGeoh5NotImplemented("warped Grid2D with 'offset_w'."))
             )
+
+        if element.geometry.origin is not None:
+            kwargs.update({"origin": element.geometry.origin})
+
         return kwargs
 
     @classmethod
