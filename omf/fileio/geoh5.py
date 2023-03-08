@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-import warnings
+import logging
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from pathlib import Path
@@ -33,6 +33,8 @@ from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from omf.volume import VolumeElement, VolumeGridGeometry
 
+_logger = logging.getLogger(__package__)
+
 
 class OMFtoGeoh5NotImplemented(NotImplementedError):
     """Custom error message for attributes not implemented by geoh5."""
@@ -46,7 +48,7 @@ class OMFtoGeoh5NotImplemented(NotImplementedError):
     @staticmethod
     def message(info):
         """Custom error message."""
-        return f"Cannot perform the conversion from OMF to geoh5. {info}"
+        return f"Conversion from OMF to geoh5 not implemented: {info}"
 
 
 class GeoH5Writer:  # pylint: disable=too-few-public-methods
@@ -58,7 +60,6 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, element: UidModel, file_name: str | Path):
-
         if not isinstance(file_name, (str, Path)):
             raise TypeError("Input 'file' must be of str or Path.")
 
@@ -93,9 +94,7 @@ def get_conversion_map(
     :returns: A sub-class of BaseConversion for the provided element.
     """
     if type(element) not in _CONVERSION_MAP:
-        raise OMFtoGeoh5NotImplemented(
-            f"Element of type {type(element)} currently not implemented."
-        )
+        raise OMFtoGeoh5NotImplemented(f"element of type {type(element)}.")
 
     # Special case for SurfaceElement describing Grid2D
     if isinstance(element, SurfaceElement) and isinstance(
@@ -114,7 +113,6 @@ class GeoH5Reader:  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, file_name: str | Path):
-
         with Workspace(file_name, mode="r") as workspace:
             self.file = workspace
             converter = ProjectConversion(workspace.root, self.file)
@@ -191,7 +189,7 @@ class BaseConversion(ABC):
                 converter = get_conversion_map(child, workspace, parent=element)
                 children += [getattr(converter, method)(child, **kwargs)]
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(error.args[0])
+                _logger.warning(str(error))
                 continue
 
         return children
@@ -209,7 +207,6 @@ class BaseConversion(ABC):
 
         with fetch_h5_handle(workspace):
             for key, alias in self._attribute_map.items():
-
                 if inspect.isclass(alias) and issubclass(alias, BaseConversion):
                     conversion = alias(  # pylint: disable=not-callable
                         element, workspace, parent=self._parent
@@ -250,7 +247,6 @@ class DataConversion(BaseConversion):
         """
 
         with fetch_h5_handle(self.geoh5) as workspace:
-
             kwargs = self.collect_attributes(element, workspace, **kwargs)
             parent = kwargs.pop("parent", None)
 
@@ -322,7 +318,7 @@ class ElementConversion(BaseConversion):
             try:
                 kwargs = self.collect_attributes(element, workspace, **kwargs)
             except OMFtoGeoh5NotImplemented as error:
-                warnings.warn(error.args[0])
+                _logger.warning(str(error))
                 return None
 
             entity = workspace.create_entity(self.geoh5_type, **{"entity": kwargs})
@@ -584,7 +580,6 @@ class ColormapConversion(ArrayConversion):
     @staticmethod
     def collect_h5_attributes(element, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
-
             if getattr(element.entity_type, "color_map", None) is not None:
                 cmap = element.entity_type.color_map
                 ind = np.argsort(cmap.values[0, :])
@@ -710,9 +705,9 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
     @classmethod
     def collect_omf_attributes(cls, element, **kwargs) -> dict:
         """Convert attributes from omf to geoh5."""
-        if element.geometry.axis_v[-1] != 0:
+        if element.geometry.axis_u[-1] != 0:
             raise OMFtoGeoh5NotImplemented(
-                f"{SurfaceGridGeometry} with 3D rotation axes."
+                f"{SurfaceGridGeometry} with 3D rotation axes: u-axis must be on the XY plane."
             )
 
         for key, alias in cls._attribute_map.items():
@@ -726,28 +721,25 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
                 {f"{alias}_cell_size": tensor[0], f"{alias}_count": len(tensor)}
             )
 
-        azimuth = (
-            450
-            - np.rad2deg(
-                np.arctan2(element.geometry.axis_v[1], element.geometry.axis_v[0])
-            )
-        ) % 360
+        azimuth = np.rad2deg(
+            np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
+        )
 
         if azimuth != 0:
             kwargs.update({"rotation": azimuth})
 
-        if element.geometry.axis_u[-1] != 0:
+        if element.geometry.axis_v[-1] != 0:
             dip = np.rad2deg(
                 np.arcsin(
-                    element.geometry.axis_u[-1]
-                    / np.linalg.norm(element.geometry.axis_u)
+                    element.geometry.axis_v[-1]
+                    / np.linalg.norm(element.geometry.axis_v)
                 )
             )
             kwargs.update({"dip": dip})
 
         if element.geometry.offset_w is not None:
-            warnings.warn(
-                str(OMFtoGeoh5NotImplemented("Warped Grid2D with 'offset_w'."))
+            _logger.warning(
+                str(OMFtoGeoh5NotImplemented("warped Grid2D with 'offset_w'."))
             )
         return kwargs
 
@@ -841,7 +833,6 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 geometry.update({f"tensor_{key}": np.abs(tensor)})
 
             if entity.rotation is not None:
-
                 azm = np.deg2rad(getattr(entity, "rotation", 0.0))
                 rot = rotation_opt(azm, 0.0)
 

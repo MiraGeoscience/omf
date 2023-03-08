@@ -27,11 +27,15 @@ packages = [
     { include = "omf" },
 ]
 
+[tool.poetry.scripts]
+geoh5_to_omf = 'omf.scripts.geoh5_to_omf:run'
+omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:run'
+
 [tool.poetry.dependencies]
 python = "^3.7.2,<3.11"
 geoh5py = "0.5.0"
 numpy = "^1.7"
-properties = "~0.4.0"
+properties = "~0.6.0"
 pypng = "^0.20220715"
 six = "^1.16"
 vectormath = "~0.2.0"
@@ -52,7 +56,7 @@ use_parentheses = true
 line_length = 88
 # auto-updated by seed-isort-config
 
-known_third_party = ["docutils", "geoh5py", "numpy", "properties", "pytest", "six", "sphinx", "toml"]
+known_third_party = ["docutils", "geoh5py", "numpy", "properties", "six", "sphinx", "toml"]
 
 [tool.black]
 # defaults are just fine
