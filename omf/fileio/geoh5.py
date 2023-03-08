@@ -835,7 +835,6 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 axis.append((-1) ** (cell_delimiter.sum() < 0))
                 geometry.update({f"tensor_{key}": np.abs(tensor)})
 
-
             azm = np.deg2rad(getattr(entity, "rotation", 0.0))
             rot = rotation_opt(azm, 0.0)
             geometry["axis_u"] = rot.dot(np.c_[axis[0], 0.0, 0.0].T).flatten()
