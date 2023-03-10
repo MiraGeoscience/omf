@@ -261,9 +261,6 @@ class DataConversion(BaseConversion):
             else:
                 kwargs["association"] = "VERTEX"
 
-            # if isinstance(parent, BlockModel) and "values" in kwargs:
-            #     kwargs["values"] = kwargs["values"].reshape(parent.shape)[:, :, ::-1].flatten()
-            #
             colormap = kwargs.pop("color_map", None)
             entity = parent.add_data({element.name: kwargs})
 
@@ -813,9 +810,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
         offsets = np.c_[offsets].sum(axis=1)
-        kwargs["z_cell_delimiters"] = (
-            kwargs["z_cell_delimiters"] * element.geometry.axis_w[-1]
-        )
+        kwargs["z_cell_delimiters"] *= element.geometry.axis_w[-1]
         rotation = np.rad2deg(
             np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
         )
