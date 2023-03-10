@@ -14,6 +14,9 @@ def compare_elements(elem_a, elem_b):
                     getattr(elem_b.geometry, attr).array,
                 )
 
+        if getattr(elem_a.geometry, "origin", None) is not None:
+            testing.assert_allclose(elem_a.geometry.origin, elem_b.geometry.origin)
+
     if hasattr(elem_a, "array"):
         testing.assert_allclose(elem_a.array.array, elem_b.array.array)
 
