@@ -806,22 +806,20 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 f"{VolumeGridGeometry} with 3D rotation axes."
             )
 
+        offsets = []
         for key, alias in cls._attribute_map.items():
             tensor = getattr(element.geometry, f"tensor_{key}")
+            axis = getattr(element.geometry, f"axis_{key}")
+            offsets.append(axis * tensor[0] / 2.0)
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
-
-        azimuth = (
-            450
-            - np.rad2deg(
-                np.arctan2(element.geometry.axis_v[1], element.geometry.axis_v[0])
-            )
-        ) % 360
-
-        if azimuth != 0:
-            kwargs.update({"rotation": azimuth})
-
-        kwargs.update({"origin": np.r_[element.geometry.origin]})
+        offsets = np.c_[offsets].sum(axis=1)
+        kwargs["z_cell_delimiters"] *= element.geometry.axis_w[-1]
+        rotation = np.rad2deg(
+            np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
+        )
+        kwargs.update({"rotation": rotation})
+        kwargs.update({"origin": np.r_[element.geometry.origin] - offsets})
 
         return kwargs
 
@@ -829,20 +827,26 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
     def collect_h5_attributes(cls, entity, workspace, **kwargs) -> dict:
         with fetch_h5_handle(workspace):
             geometry = {}
-            offsets = []
+            axis = []
             for key, alias in cls._attribute_map.items():
                 cell_delimiter = getattr(entity, f"{alias}_cell_delimiters")
                 tensor = np.diff(cell_delimiter)
-                offsets.append(np.sum(tensor[tensor < 0]))
+                axis.append((-1) ** (cell_delimiter.sum() < 0))
                 geometry.update({f"tensor_{key}": np.abs(tensor)})
 
-            if entity.rotation is not None:
-                azm = np.deg2rad(getattr(entity, "rotation", 0.0))
-                rot = rotation_opt(azm, 0.0)
+            azm = np.deg2rad(getattr(entity, "rotation", 0.0))
+            rot = rotation_opt(azm, 0.0)
+            geometry["axis_u"] = rot.dot(np.c_[axis[0], 0.0, 0.0].T).flatten()
+            geometry["axis_v"] = rot.dot(np.c_[0.0, axis[1], 0.0].T).flatten()
+            geometry["axis_w"] = np.r_[0, 0, axis[2]]
 
-                geometry["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
-                geometry["axis_v"] = rot.dot(np.c_[0.0, 1.0, 0.0].T).flatten()
+            offsets = []
+            for key in cls._attribute_map:
+                offsets.append(
+                    geometry[f"axis_{key}"] * geometry[f"tensor_{key}"][0] / 2.0
+                )
 
+            offsets = np.c_[offsets].sum(axis=1)
             geometry.update(
                 {
                     "origin": np.r_[
@@ -853,6 +857,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 }
             )
             kwargs.update({"geometry": geometry})
+
         return kwargs
 
 
@@ -983,7 +988,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
             ),
             order="C",
         )
-        values = values.transpose((2, 0, 1))[::-1, :, :].flatten(order="F")
+        values = values.transpose((2, 0, 1)).flatten(order="F")
 
     else:
         values = values.reshape(
@@ -993,7 +998,7 @@ def block_model_reordering(entity: BlockModel | VolumeElement, values: np.ndarra
                 entity.shape[1],
             ),
             order="F",
-        )[::-1, :, :]
+        )
         values = values.transpose((1, 2, 0)).flatten()
 
     return values
