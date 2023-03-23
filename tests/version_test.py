@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import toml
+import tomli as toml
 
 import omf
 

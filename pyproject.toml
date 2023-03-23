@@ -45,7 +45,7 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 sphinx = "^5.3"
-toml = "^0.10.2"
+tomli = "*"  # for tests only
 
 [tool.isort]
 # settings for compatibility between ``isort`` and ``black`` formatting
