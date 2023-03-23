@@ -112,7 +112,7 @@ def test_volume_flip_origin_z(tmp_path):
         converter = omf.fileio.geoh5.get_conversion_map(block, workspace)
         converted_omf = converter.from_geoh5(block)
 
-        with Workspace(file=str(tmp_path / "block_model_converted.geoh5")) as out_ws:
+        with Workspace(str(tmp_path / "block_model_converted.geoh5")) as out_ws:
             converter = omf.fileio.geoh5.get_conversion_map(converted_omf, out_ws)
             converted_geoh5 = converter.from_omf(converted_omf)
 
