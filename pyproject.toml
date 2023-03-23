@@ -32,8 +32,8 @@ geoh5_to_omf = 'omf.scripts.geoh5_to_omf:run'
 omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:run'
 
 [tool.poetry.dependencies]
-python = "^3.7.2,<3.11"
-geoh5py = "0.5.0"
+python = "^3.8,<3.11"
+geoh5py = ">=0.5.0"
 numpy = "^1.7"
 properties = "~0.6.0"
 pypng = "^0.20220715"
