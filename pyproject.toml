@@ -33,7 +33,7 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:run'
 
 [tool.poetry.dependencies]
 python = "^3.8,<3.11"
-geoh5py = {version = ">= 0.5.0, *", allow-prereleases = true}
+geoh5py = {version = ">= 0.5.0", allow-prereleases = true}
 numpy = "^1.7"
 properties = "~0.6.0"
 pypng = "^0.20220715"
