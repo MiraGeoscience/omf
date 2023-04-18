@@ -88,7 +88,7 @@ def test_volume_to_geoh5(tmp_path):
         ref_a = block_model.get_entity("Reference Data")[0]
         ref_b = block_model.get_entity("Reference Data 2")[0]
 
-        assert all([key in ref_a.value_map.map and value == ref_a.value_map.map[key] for key, value in ref_b.value_map.map.items()])
+        assert all(key in ref_a.value_map.map and value == ref_a.value_map.map[key] for key, value in ref_b.value_map.map.items())
 
     omf.fileio.utils.compare_elements(converted_omf, vol)
 
