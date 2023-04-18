@@ -493,15 +493,18 @@ class ReferenceMapConversion(ArrayConversion):
         if not element.legends:
             return kwargs
 
-        value_map = {
-            count + 1: str(val) for count, val in enumerate(element.legends[0].values)
-        }
-        color_map = np.vstack(
-            [
-                np.r_[count + 1, val, 1.0]
-                for count, val in enumerate(element.legends[1].values)
-            ]
-        )
+        for legend in element.legends:
+            if isinstance(legend.values, StringArray):
+                value_map = {
+                    count + 1: str(val) for count, val in enumerate(legend.values)
+                }
+            else:
+                color_map = np.vstack(
+                    [
+                        np.r_[count + 1, val, 1.0]
+                        for count, val in enumerate(legend.values)
+                    ]
+                )
         kwargs["value_map"] = value_map
         kwargs["type"] = "referenced"
         kwargs["color_map"] = color_map
