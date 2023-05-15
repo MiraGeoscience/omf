@@ -1,0 +1,8 @@
+# can only push Git LFS objects to public forks if the repository network already has Git LFS objects
+# or you have write access to the root of the repository network.
+# (from https://docs.github.com/en/repositories/working-with-files/managing-large-files/collaboration-with-git-large-file-storage)
+#
+#*.pt filter=lfs diff=lfs merge=lfs -text
+#*.geoh5 filter=lfs diff=lfs merge=lfs -text
+#/assets/** filter=lfs diff=lfs merge=lfs -text
+#*.h5 filter=lfs diff=lfs merge=lfs -text

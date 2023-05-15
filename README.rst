@@ -1,31 +1,41 @@
 omf
 ***
 
-.. image:: https://img.shields.io/pypi/v/omf.svg
-    :target: https://pypi.python.org/pypi/omf
+.. image:: https://img.shields.io/pypi/v/mira-omf.svg
+    :target: https://pypi.python.org/pypi/mira-omf
     :alt: Latest PyPI version
 
-.. image:: https://readthedocs.org/projects/omf/badge/?version=latest
-    :target: http://omf.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/omf/badge/?version=stable
+    :target: http://omf.readthedocs.io/en/stable/
     :alt: Documentation
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/aranzgeo/omf/blob/master/LICENSE
+    :target: https://github.com/MiraGeoscience/omf/blob/main/LICENSE
     :alt: MIT license
 
-.. image:: https://travis-ci.org/aranzgeo/omf.svg?branch=master
-    :target: https://travis-ci.org/aranzgeo/omf
-    :alt: Travis tests
-
-.. image:: https://codecov.io/gh/aranzgeo/omf/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/aranzgeo/omf
-    :alt: Code coverage
+.. image:: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml/badge.svg
+    :target: https://github.com/MiraGeoscience/omf/actions/workflows/pytest-windows.yml
+    :alt: pytest
 
 
-Version: 0.9.0
+Version: 3.0.0
 
 API library for Open Mining Format, a new standard for mining data backed by
 the `Global Mining Standards & Guidelines Group <http://www.globalminingstandards.org/>`_.
+
+.. warning::
+    **Pre-Release Notice**
+
+    This is a Beta release of the Open Mining Format (OMF) and the associated
+    Python API. The storage format and libraries might be changed in
+    backward-incompatible ways and are not subject to any SLA or deprecation
+    policy.
+
+.. warning::
+    **Alpha-Release Notice**
+
+    This is a fork created by Mira Geoscience for interoperability with the
+    geoh5 file format.
 
 Why?
 ----
@@ -57,10 +67,12 @@ used in the mining community.
 Connections
 -----------
 
-This library makes use of the `properties <https://github.com/3ptscience/properties>`_
+This library makes use of the `properties <https://github.com/seequent/properties>`_
 open-source project, which is designed and publicly supported by
-`3point Science <https://www.3ptscience.com>`_, an
-`ARANZ Geo Limited <http://www.aranzgeo.com>`_ company.
+`Seequent <https://seequent.com>`_.
+
+Connection to the geoh5 format makes use of `geoh5py <https://geoh5py.readthedocs.io/>`_
+publicly supported by `Mira Geoscience <https://mirageoscience.com/>`_
 
 Installation
 ------------
@@ -68,14 +80,14 @@ Installation
 To install the repository, ensure that you have
 `pip installed <https://pip.pypa.io/en/stable/installing/>`_ and run:
 
-.. code::
+.. code:: bash
 
     pip install omf
 
-Or from `github <https://github.com/aranzgeo/omf>`_:
+Or from `github <https://github.com/GMSGDataExchange/omf>`_:
 
-.. code::
+.. code:: bash
 
-    git clone https://github.com/aranzgeo/omf.git
+    git clone https://github.com/GMSGDataExchange/omf.git
     cd omf
     pip install -e .

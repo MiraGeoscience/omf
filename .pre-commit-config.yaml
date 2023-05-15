@@ -1,0 +1,85 @@
+
+default_language_version:
+    python: python3
+exclude: docs/(conf.py|_ext/)
+default_stages: [commit,push]
+fail_fast: false
+
+ci:
+    skip: [pylint]
+
+repos:
+-   repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+    -   id: black
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
+        additional_dependencies: [tomli] # to read config from pyproject.toml
+-   repo: https://github.com/humitos/mirrors-autoflake
+    rev: v1.1
+    hooks:
+    -   id: autoflake
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+        files: ^omf/fileio/geoh5*
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.4.0
+    hooks:
+    -   id: pyupgrade
+        args: [--py38-plus]
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.3.0
+    hooks:
+    -   id: mypy
+        additional_dependencies: [types-six]
+        args: [--ignore-missing-imports, --scripts-are-modules, --show-error-context,
+               --show-column-numbers]
+        files: ^omf/fileio/geoh5*
+-   repo: local
+    hooks:
+    -   id: pylint
+        name: pylint
+        entry: poetry run pylint
+        language: system
+        require_serial: true  # pylint does its own parallelism
+        types: [text]
+        types_or: [python, pyi]
+        exclude: (devtools|docs)/
+        files: ^(omf/fileio/geoh5|tests/)
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.2.4
+    hooks:
+    -   id: codespell
+        exclude: (\.ipynb$|^poetry.lock$)
+        entry: codespell -I .codespellignore
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: trailing-whitespace
+        exclude: \.mdj$
+    -   id: check-toml
+    -   id: check-yaml
+#    -   id: check-added-large-files # crashing on some configuration. To be investigated
+    -   id: check-case-conflict
+    -   id: check-merge-conflict
+    -   id: debug-statements
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+        exclude: \.mdj$
+    -   id: mixed-line-ending
+    -   id: name-tests-test
+-   repo: https://github.com/rstcheck/rstcheck
+    rev: v6.1.2
+    hooks:
+    -   id: rstcheck
+        additional_dependencies: [sphinx]
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: rst-backticks
+        exclude: ^THIRD_PARTY_SOFTWARE.rst$
