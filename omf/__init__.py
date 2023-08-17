@@ -4,24 +4,10 @@ import logging
 import sys
 
 from .base import Project
-from .data import (
-    ColorArray,
-    ColorData,
-    DateTimeArray,
-    DateTimeColormap,
-    DateTimeData,
-    Legend,
-    MappedData,
-    ScalarArray,
-    ScalarColormap,
-    ScalarData,
-    StringArray,
-    StringData,
-    Vector2Array,
-    Vector2Data,
-    Vector3Array,
-    Vector3Data,
-)
+from .data import (ColorArray, ColorData, DateTimeArray, DateTimeColormap,
+                   DateTimeData, Legend, MappedData, ScalarArray,
+                   ScalarColormap, ScalarData, StringArray, StringData,
+                   Vector2Array, Vector2Data, Vector3Array, Vector3Data)
 from .fileio import GeoH5Writer, OMFReader, OMFWriter
 from .lineset import LineSetElement, LineSetGeometry
 from .pointset import PointSetElement, PointSetGeometry

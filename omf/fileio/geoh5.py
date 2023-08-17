@@ -12,22 +12,14 @@ from typing import Any
 import numpy as np
 from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
 from geoh5py.groups import RootGroup
-from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
+from geoh5py.objects import (BlockModel, Curve, Grid2D, ObjectBase, Points,
+                             Surface)
 from geoh5py.shared import FLOAT_NDV, INTEGER_NDV, Entity
 from geoh5py.workspace import Workspace
 
 from omf.base import Project, UidModel
-from omf.data import (
-    ColorArray,
-    Int2Array,
-    Legend,
-    MappedData,
-    ScalarArray,
-    ScalarColormap,
-    ScalarData,
-    StringArray,
-    Vector3Array,
-)
+from omf.data import (ColorArray, Int2Array, Legend, MappedData, ScalarArray,
+                      ScalarColormap, ScalarData, StringArray, Vector3Array)
 from omf.lineset import LineSetElement, LineSetGeometry
 from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
