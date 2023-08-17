@@ -1,3 +1,4 @@
+import argparse
 import logging
 import sys
 from pathlib import Path
@@ -9,12 +10,19 @@ _logger = logging.getLogger(__package__)
 
 
 def run():
-    omf_filepath = Path(sys.argv[1])
-    if len(sys.argv) < 3:
+    parser = argparse.ArgumentParser(
+        prog="omf_to_geoh5",
+        description="Converts an OMF file to a new geoh5 file.",
+    )
+    parser.add_argument("omf_file", type=Path)
+    parser.add_argument("-o", "--out", type=Path, required=False, default=None)
+    args = parser.parse_args()
+
+    omf_filepath = args.omf_file
+    if args.out is None:
         output_filepath = omf_filepath.with_suffix(".geoh5")
     else:
-        output_filepath = Path(sys.argv[2])
-        print(output_filepath.suffix)
+        output_filepath = args.out
         if not output_filepath.suffix:
             output_filepath = output_filepath.with_suffix(".geoh5")
     if output_filepath.exists():
