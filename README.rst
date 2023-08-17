@@ -21,7 +21,7 @@ omf
 Version: 3.0.0-alpha.4
 
 API library for Open Mining Format, a new standard for mining data backed by
-the `Global Mining Standards & Guidelines Group <http://www.globalminingstandards.org/>`_.
+the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
 
 .. warning::
     **Pre-Release Notice**
