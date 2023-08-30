@@ -57,13 +57,20 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
 
     :param element: Input :obj:`omf.base.UidModel` element to be converted.
     :param file_name: Input file name with *.geoh5 extension.
+    :param compression: Compression level for data.
     """
 
-    def __init__(self, element: UidModel, file_name: str | Path):
+    def __init__(
+        self,
+        element: UidModel,
+        file_name: str | Path,
+        compression: int = 5,
+    ):
         if not isinstance(file_name, (str, Path)):
             raise TypeError("Input 'file' must be of str or Path.")
 
         self.file = file_name
+        self.compression = compression
         self.entity = element
         self.element = element
 
@@ -74,7 +81,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
 
     @entity.setter
     def entity(self, element):
-        converter = get_conversion_map(element, self.file)
+        converter = get_conversion_map(element, self.file, self.compression)
         self._entity = converter.from_omf(element)
 
     def __call__(self):
@@ -82,13 +89,17 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
 
 
 def get_conversion_map(
-    element: UidModel | Entity, workspace: str | Path | Workspace, parent=None
+    element: UidModel | Entity,
+    workspace: str | Path | Workspace,
+    compression: int,
+    parent=None
 ):
     """
     Utility method to get the appropriate conversion class is it exists.
 
     :param element: Either an omf or geoh5 class.
     :param workspace: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+    :param compression: Compression level for data.
     :param parent: Optional parent object used for conversion.
 
     :returns: A sub-class of BaseConversion for the provided element.
@@ -100,9 +111,9 @@ def get_conversion_map(
     if isinstance(element, SurfaceElement) and isinstance(
         element.geometry, SurfaceGridGeometry
     ):
-        return SurfaceGridConversion(element, workspace, parent=parent)
+        return SurfaceGridConversion(element, workspace, parent=parent, compression=compression)
 
-    return _CONVERSION_MAP[type(element)](element, workspace, parent=parent)
+    return _CONVERSION_MAP[type(element)](element, workspace, compression=compression, parent=parent)
 
 
 class GeoH5Reader:  # pylint: disable=too-few-public-methods
@@ -128,6 +139,7 @@ class BaseConversion(ABC):
 
     :param element: Either an omf or geoh5 class.
     :param geoh5: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+    :param compression: Compression level for data.
     :param parent: (Optional) Parental object
     """
 
@@ -141,11 +153,18 @@ class BaseConversion(ABC):
     _parent = None
     _mapping = None
 
-    def __init__(self, element, geoh5: str | Path | Workspace, parent=None):
+    def __init__(
+        self,
+        element,
+        geoh5: str | Path | Workspace,
+        compression: int,
+        parent=None
+    ):
         if element is None:
             raise ValueError("Input 'element' cannot be None.")
 
         self.geoh5 = geoh5
+        self.compression = compression
         self._parent = parent
 
     @abstractmethod
@@ -158,7 +177,10 @@ class BaseConversion(ABC):
 
     @staticmethod
     def process_dependents(
-        element: UidModel | Entity, parent: UidModel | Entity, workspace
+        element: UidModel | Entity,
+        parent: UidModel | Entity,
+        workspace: str | Path | Workspace,
+        compression: int,
     ) -> list:
         """
         Convert the children elements or entities.
@@ -166,6 +188,7 @@ class BaseConversion(ABC):
         :param element: Either an omf or geoh5 class.
         :param parent: Parental omf or geoh5 class.
         :param workspace: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+        :param compression: Compression level for data.
 
         :return: List of children UiDModel or Entity objects.
         """
@@ -186,7 +209,7 @@ class BaseConversion(ABC):
 
         for child in children_list:
             try:
-                converter = get_conversion_map(child, workspace, parent=element)
+                converter = get_conversion_map(child, workspace, compression=compression, parent=element)
                 children += [getattr(converter, method)(child, **kwargs)]
             except OMFtoGeoh5NotImplemented as error:
                 _logger.warning(str(error))
@@ -209,7 +232,7 @@ class BaseConversion(ABC):
             for key, alias in self._attribute_map.items():
                 if inspect.isclass(alias) and issubclass(alias, BaseConversion):
                     conversion = alias(  # pylint: disable=not-callable
-                        element, workspace, parent=self._parent
+                        element, workspace, self.compression, parent=self._parent
                     )
                     kwargs = conversion.collect_attributes(element, workspace, **kwargs)
                 else:
@@ -262,7 +285,7 @@ class DataConversion(BaseConversion):
                 kwargs["association"] = "VERTEX"
 
             colormap = kwargs.pop("color_map", None)
-            entity = parent.add_data({element.name: kwargs})
+            entity = parent.add_data({element.name: kwargs}, compression=self.compression)
 
             if colormap is not None:
                 entity.entity_type.color_map = colormap
@@ -276,7 +299,7 @@ class DataConversion(BaseConversion):
         :param entity: Input :obj:`geoh5.data.Data` entity.
         """
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_attributes(entity, workspace, **kwargs)
+            kwargs = self.collect_attributes(entity, workspace, self.compression, **kwargs)
             uid = kwargs.pop("uid")
 
             if entity.association.name == "VERTEX":
@@ -302,8 +325,8 @@ class ElementConversion(BaseConversion):
         "uid": "uid",
     }
 
-    def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace, **kwargs):
-        super().__init__(obj, geoh5, **kwargs)
+    def __init__(self, obj: UidModel | Entity, geoh5: str | Path | Workspace, compression: int, **kwargs):
+        super().__init__(obj, geoh5, compression, **kwargs)
 
         if isinstance(obj, UidModel) and hasattr(obj, "geometry"):
             self.geoh5_type = _CLASS_MAP[type(obj.geometry)]
@@ -322,7 +345,7 @@ class ElementConversion(BaseConversion):
                 return None
 
             entity = workspace.create_entity(self.geoh5_type, **{"entity": kwargs})
-            self.process_dependents(element, entity, workspace)
+            self.process_dependents(element, entity, workspace, self.compression)
 
         return entity
 
@@ -340,7 +363,7 @@ class ElementConversion(BaseConversion):
             if hasattr(element, "_backend"):
                 element._backend.update({"uid": uid})  # pylint: disable=W0212
 
-            element.data = self.process_dependents(entity, element, workspace)
+            element.data = self.process_dependents(entity, element, workspace, self.compression)
 
         return element
 
@@ -368,7 +391,7 @@ class ProjectConversion(BaseConversion):
             for key, value in kwargs.items():
                 setattr(root, key, value)
 
-            self.process_dependents(element, root, workspace)
+            self.process_dependents(element, root, workspace, self.compression)
 
         return root
 
@@ -379,7 +402,7 @@ class ProjectConversion(BaseConversion):
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
             getattr(project, "_backend").update({"uid": uid})  # pylint: disable=W0212
-            project.elements = self.process_dependents(entity, project, workspace)
+            project.elements = self.process_dependents(entity, project, workspace, self.compression)
 
         return project
 
@@ -788,9 +811,9 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
     _attribute_map: dict = {"u": "u", "v": "v", "w": "z"}
 
     def __init__(
-        self, obj: UidModel | Entity, geoh5: str | Path | Workspace, parent=None
+        self, obj: UidModel | Entity, geoh5: str | Path | Workspace, compression: int, parent=None
     ):
-        super().__init__(obj, geoh5, parent=parent)
+        super().__init__(obj, geoh5, compression, parent=parent)
 
     def collect_attributes(self, element, workspace, **kwargs):
         if isinstance(element, VolumeElement):
@@ -961,7 +984,7 @@ def fetch_h5_handle(file: str | Workspace | Path, mode: str = "a") -> Workspace:
         if Path(file).suffix != ".geoh5":
             raise ValueError("Input h5 file must have a 'geoh5' extension.")
 
-        h5file = Workspace(file, mode)
+        h5file = Workspace(file, mode=mode)
 
         try:
             yield h5file
