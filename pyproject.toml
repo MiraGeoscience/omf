@@ -34,8 +34,8 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:run'
 [tool.poetry.dependencies]
 python = "^3.8,<3.11"
 #geoh5py = ">=0.5.0"
-geoh5py = {url = "https://github.com/MiraGeoscience/geoh5py/archive/refs/heads/GEOPY-1017.zip#sha256="}
-numpy = "^1.7"
+geoh5py = {url = "https://github.com/MiraGeoscience/geoh5py/archive/refs/heads/release/0.8.0-alpha4.zip#sha256="}
+numpy = "~1.23.5"
 properties = "~0.6.0"
 pypng = "^0.20220715"
 six = "^1.16"
