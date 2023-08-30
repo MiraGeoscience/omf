@@ -91,7 +91,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
 def get_conversion_map(
     element: UidModel | Entity,
     workspace: str | Path | Workspace,
-    compression: int,
+    compression: int = 5,
     parent=None
 ):
     """
@@ -157,7 +157,7 @@ class BaseConversion(ABC):
         self,
         element,
         geoh5: str | Path | Workspace,
-        compression: int,
+        compression: int = 5,
         parent=None
     ):
         if element is None:
@@ -299,7 +299,7 @@ class DataConversion(BaseConversion):
         :param entity: Input :obj:`geoh5.data.Data` entity.
         """
         with fetch_h5_handle(self.geoh5) as workspace:
-            kwargs = self.collect_attributes(entity, workspace, self.compression, **kwargs)
+            kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
 
             if entity.association.name == "VERTEX":
