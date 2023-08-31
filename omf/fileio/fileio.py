@@ -3,6 +3,7 @@
 import json
 import struct
 import uuid
+from pathlib import Path
 
 from six import string_types
 
@@ -36,13 +37,13 @@ class OMFWriter:
     in the binary blob.
     """
 
-    def __init__(self, project, fname):
+    def __init__(self, project: UidModel, fname: str | Path, compression: int = 5):
         """Project serialization is performed on OMFWriter init
 
         Binary data is written during project serialization
         """
         if fname.endswith("geoh5"):
-            GeoH5Writer(project, fname)
+            GeoH5Writer(project, fname, compression=compression)
         else:
             if not fname.endswith(".omf"):
                 fname = fname + ".omf"
