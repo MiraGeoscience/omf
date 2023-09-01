@@ -42,6 +42,7 @@ class OMFWriter:
 
         Binary data is written during project serialization
         """
+
         if fname.endswith("geoh5"):
             GeoH5Writer(project, fname, compression=compression)
         else:
