@@ -1,11 +1,11 @@
 """fileio.py: OMF Writer and Reader for serializing to and from .omf files"""
 
+from __future__ import annotations
+
 import json
 import struct
 import uuid
 from pathlib import Path
-
-from six import string_types
 
 from omf.base import UidModel
 from omf.fileio.geoh5 import GeoH5Writer
@@ -104,7 +104,7 @@ class OMFReader:
         if isinstance(fopen, str):
             fopen = open(fopen, "rb")
         self._fopen = fopen
-        fopen.seek(0, 0)
+        fopen.seek(0, 0)  # pylint: disable=R1732
         self._uid, self._json_start = self.read_header()
         self._project_json = self.read_json()
 
@@ -159,8 +159,8 @@ class OMFReader:
         file_version = file_version[0 : len(__version__)]
         if file_version != __version__:
             raise ValueError(
-                "Version mismatch: file version {fv!r}, "
-                "reader version {rv!r}".format(fv=file_version, rv=__version__)
+                f"Version mismatch: file version {file_version}, "
+                f"reader version {__version__}"
             )
         uid = uuid.UUID(bytes=struct.unpack("<16s", self._fopen.read(16))[0])
         json_start = struct.unpack("<Q", self._fopen.read(8))[0]

@@ -597,7 +597,9 @@ class ReferenceMapConversion(ArrayConversion):
                         Legend(values=StringArray(array=labels)),
                         Legend(
                             values=ColorArray(
-                                array=element.entity_type.color_map.values[1:-1, ind:]  # type: ignore
+                                array=element.entity_type.color_map.values[
+                                    1:-1, ind:
+                                ]  # type: ignore
                                 .astype(int)
                                 .reshape((3, -1))
                                 .T.tolist()
