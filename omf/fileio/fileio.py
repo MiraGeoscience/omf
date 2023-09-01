@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import struct
 import uuid
-from pathlib import Path
 
 from omf.base import UidModel
 from omf.fileio.geoh5 import GeoH5Writer
@@ -37,7 +36,7 @@ class OMFWriter:
     in the binary blob.
     """
 
-    def __init__(self, project: UidModel, fname: str | Path, compression: int = 5):
+    def __init__(self, project: UidModel, fname: str, compression: int = 5):
         """Project serialization is performed on OMFWriter init
 
         Binary data is written during project serialization
@@ -102,9 +101,9 @@ class OMFReader:
 
     def __init__(self, fopen):
         if isinstance(fopen, str):
-            fopen = open(fopen, "rb")
+            fopen = open(fopen, "rb")  # pylint: disable=R1732
         self._fopen = fopen
-        fopen.seek(0, 0)  # pylint: disable=R1732
+        fopen.seek(0, 0)
         self._uid, self._json_start = self.read_header()
         self._project_json = self.read_json()
 
@@ -159,8 +158,8 @@ class OMFReader:
         file_version = file_version[0 : len(__version__)]
         if file_version != __version__:
             raise ValueError(
-                f"Version mismatch: file version {file_version}, "
-                f"reader version {__version__}"
+                f"Version mismatch: file version {file_version!r}, "
+                f"reader version {__version__!r}"
             )
         uid = uuid.UUID(bytes=struct.unpack("<16s", self._fopen.read(16))[0])
         json_start = struct.unpack("<Q", self._fopen.read(8))[0]
