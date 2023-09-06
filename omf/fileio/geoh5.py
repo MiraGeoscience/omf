@@ -221,12 +221,23 @@ class BaseConversion(ABC):
             children_list = getattr(element, "children", [])
             kwargs = {}
 
+        count = 1
         for child in children_list:
             try:
                 converter = get_conversion_map(
                     child, workspace, compression=compression, parent=element
                 )
                 children += [getattr(converter, method)(child, **kwargs)]
+
+                if len(children_list) > 1:
+                    _logger.info(
+                        "Converting %s: %i of %i",
+                        {element.name},
+                        count,
+                        len(children_list),
+                    )
+                    count += 1
+
             except OMFtoGeoh5NotImplemented as error:
                 _logger.warning(str(error))
                 continue
