@@ -523,7 +523,7 @@ class ArrayConversion(BaseConversion):
         """
         with fetch_h5_handle(workspace):
             if isinstance(element, UidModel):
-                values = np.r_[getattr(element, "array")]
+                values = element.array.array
 
                 if np.issubdtype(values.dtype, np.floating):
                     values[np.isclose(values, FLOAT_NDV)] = np.nan
@@ -1187,10 +1187,14 @@ def fetch_h5_handle(
         finally:
             pass
     else:
-        if Path(file).suffix != ".geoh5":
+        file_path = Path(file)
+        if file_path.suffix != ".geoh5":
             raise ValueError("Input h5 file must have a 'geoh5' extension.")
 
-        h5file = Workspace(file, mode=mode)
+        if not file_path.exists():
+            h5file = Workspace.create(file)
+        else:
+            h5file = Workspace(file, mode=mode)
 
         try:
             yield h5file
