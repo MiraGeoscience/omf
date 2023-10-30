@@ -537,7 +537,7 @@ class ArrayConversion(BaseConversion):
                 values = element.array.array
 
                 if np.issubdtype(values.dtype, np.floating):
-                    values[np.isclose(values, FLOAT_NDV)] = np.nan
+                    values[np.isclose(values, FLOAT_NDV, atol=1e-45)] = np.nan
                     values = values.astype(np.float32)
                 else:
                     values = values.astype(np.int32)
