@@ -1,3 +1,4 @@
+import argparse
 import logging
 import sys
 from pathlib import Path
@@ -9,24 +10,21 @@ _logger = logging.getLogger(__package__)
 
 
 def run():
-    omf_filepath = Path(sys.argv[1])
-    output_filepath = omf_filepath.with_suffix(".geoh5")
-    compression = 5
+    parser = argparse.ArgumentParser(
+        prog="omf_to_geoh5",
+        description="Converts an OMF file to a new geoh5 file.",
+    )
+    parser.add_argument("omf_file", type=Path)
+    parser.add_argument("-o", "--out", type=Path, required=False, default=None)
+    args = parser.parse_args()
 
-    if len(sys.argv) < 3:
+    omf_filepath = args.omf_file
+    if args.out is None:
         output_filepath = omf_filepath.with_suffix(".geoh5")
     else:
-        if sys.argv[2].isdigit():
-            compression = sys.argv[2]
-            if len(sys.argv) > 3:
-                output_filepath = Path(sys.argv[3])
-        elif isinstance(sys.argv[2], str):
-            output_filepath = Path(sys.argv[2])
-            if not output_filepath.suffix:
-                output_filepath = output_filepath.with_suffix(".geoh5")
-            if len(sys.argv) > 3:
-                compression = sys.argv[3]
-
+        output_filepath = args.out
+        if not output_filepath.suffix:
+            output_filepath = output_filepath.with_suffix(".geoh5")
     if output_filepath.exists():
         _logger.error(
             "Cowardly refuses to overwrite existing file '%s'.", output_filepath

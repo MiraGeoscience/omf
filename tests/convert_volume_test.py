@@ -49,6 +49,25 @@ def test_volume_to_geoh5(tmp_path):
                     ),
                 ],
             ),
+            omf.MappedData(
+                name="Reference Data 2",
+                location="cells",
+                array=np.random.randint(-1, 3, np.prod(dims))
+                .flatten()
+                .astype(np.int32),
+                legends=[
+                    omf.Legend(
+                        values=omf.ColorArray(
+                            array=[
+                                [255, 0, 255],
+                                [255, 255, 0],
+                                [255, 0, 0],
+                            ]
+                        )
+                    ),
+                    omf.Legend(values=omf.StringArray(array=["abc", "123", "@#$%"])),
+                ],
+            ),
         ],
     )
 
@@ -64,6 +83,15 @@ def test_volume_to_geoh5(tmp_path):
 
         converter = omf.fileio.geoh5.get_conversion_map(block_model, workspace)
         converted_omf = converter.from_geoh5(block_model)
+
+        # Compare reference data created two ways
+        ref_a = block_model.get_entity("Reference Data")[0]
+        ref_b = block_model.get_entity("Reference Data 2")[0]
+
+        assert all(
+            key in ref_a.value_map.map and value == ref_a.value_map.map[key]
+            for key, value in ref_b.value_map.map.items()
+        )
 
     omf.fileio.utils.compare_elements(converted_omf, vol)
 
