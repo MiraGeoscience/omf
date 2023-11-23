@@ -647,19 +647,25 @@ class ReferenceMapConversion(ArrayConversion):
         if not element.legends:
             return kwargs
 
-        ind = 0
-        alpha = 0
-        value_map = {ind: "Unknown"}
-        color_map = [np.r_[ind, [0, 0, 0], alpha]]
+        alpha = 1.0
+        value_map = {0: "Unknown"}
+        color_map = [np.r_[0, [0, 0, 0], alpha]]
 
-        for name, rgb in zip(element.legends[0].values, element.legends[1].values):
-            ind += 1
+        for legend in element.legends:
+            if isinstance(legend.values, StringArray):
+                for count, name in enumerate(legend.values):
+                    if str(name).lower() == "unknown":
+                        name = f"[{str(name).upper()}]"
 
-            if str(name).lower() == "unknown":
-                name = f"[{str(name).upper()}]"
+                    value_map[count + 1] = str(name)
 
-            value_map[ind] = str(name)
-            color_map.append(np.r_[ind, rgb, alpha])
+            else:
+                color_map.append(
+                    [
+                        np.r_[count + 1, val, alpha]
+                        for count, val in enumerate(legend.values)
+                    ]
+                )
 
         kwargs["value_map"] = value_map
         kwargs["type"] = "referenced"
