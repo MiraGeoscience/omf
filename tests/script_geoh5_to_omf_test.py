@@ -7,6 +7,8 @@ import pytest
 import omf
 from omf.scripts import geoh5_to_omf
 
+# pylint: disable=duplicate-code
+
 
 @pytest.fixture(
     scope="module",
