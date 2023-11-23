@@ -10,7 +10,7 @@ ci:
 
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
     -   id: black
 -   repo: https://github.com/PyCQA/isort
@@ -28,12 +28,12 @@ repos:
     -   id: flake8
         files: ^omf/fileio/geoh5*
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.4.0
     hooks:
     -   id: pyupgrade
         args: [--py38-plus]
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.0
+    rev: v1.3.0
     hooks:
     -   id: mypy
         additional_dependencies: [types-six]
@@ -52,10 +52,10 @@ repos:
         exclude: (devtools|docs)/
         files: ^(omf/fileio/geoh5|tests/)
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.2
+    rev: v2.2.4
     hooks:
     -   id: codespell
-        exclude: (\.ipynb$)
+        exclude: (\.ipynb$|^poetry.lock$)
         entry: codespell -I .codespellignore
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -74,7 +74,7 @@ repos:
     -   id: mixed-line-ending
     -   id: name-tests-test
 -   repo: https://github.com/rstcheck/rstcheck
-    rev: v6.1.1
+    rev: v6.1.2
     hooks:
     -   id: rstcheck
         additional_dependencies: [sphinx]
