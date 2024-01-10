@@ -21,7 +21,7 @@ def create_omf_file(omf_file_path: Path) -> None:
     """Create an OMF file with random data."""
     points = omf.PointSetElement(
         name="Random Points",
-        description="Just random points",
+        description="Some random points",
         geometry=omf.PointSetGeometry(vertices=np.random.rand(100, 3)),
         data=[
             omf.ScalarData(
