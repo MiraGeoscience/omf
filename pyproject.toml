@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mira-omf"
-version = "3.0.1"
+version = "3.1.0"
 description = "API Library for Open Mining Format"
 authors = [
     "Mira Geoscience <dominiquef@mirageoscience.com>",
@@ -33,8 +33,9 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:run'
 
 [tool.poetry.dependencies]
 python = "^3.8,<3.11"
-geoh5py = {version = ">= 0.5.0", allow-prereleases = true}
-numpy = "^1.7"
+geoh5py = {version = "~0.8.0", allow-prereleases = true}
+# geoh5py = {url = "https://github.com/MiraGeoscience/geoh5py/archive/refs/heads/release/0.8.0.zip#sha256="}
+numpy = "~1.23.5"
 properties = "~0.6.0"
 pypng = "^0.20220715"
 six = "^1.16"
