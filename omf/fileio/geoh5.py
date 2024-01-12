@@ -537,7 +537,7 @@ class ArrayConversion(BaseConversion):
                 values = element.array.array
 
                 if np.issubdtype(values.dtype, np.floating):
-                    values[np.isclose(values, FLOAT_NDV)] = np.nan
+                    values[np.isclose(values, FLOAT_NDV, atol=1e-45)] = np.nan
                     values = values.astype(np.float32)
                 else:
                     values = values.astype(np.int32)
@@ -585,7 +585,7 @@ class IndicesConversion(ArrayConversion):
         """
         with fetch_h5_handle(workspace):
             if isinstance(element, UidModel):
-                values = np.r_[getattr(element, "array")]
+                values = element.array.array
             else:
                 values = getattr(element, "values", None)
                 values[np.isclose(values, INTEGER_NDV)] = 0
@@ -647,18 +647,29 @@ class ReferenceMapConversion(ArrayConversion):
         if not element.legends:
             return kwargs
 
-        value_map = {
-            count + 1: str(val) for count, val in enumerate(element.legends[0].values)
-        }
-        color_map = np.vstack(
-            [
-                np.r_[count + 1, val, 1.0]
-                for count, val in enumerate(element.legends[1].values)
-            ]
-        )
+        alpha = 1.0
+        value_map = {0: "Unknown"}
+        color_map = [np.r_[0, [0, 0, 0], alpha]]
+
+        for legend in element.legends:
+            if isinstance(legend.values, StringArray):
+                for count, name in enumerate(legend.values):
+                    if str(name).lower() == "unknown":
+                        name = f"[{str(name).upper()}]"
+
+                    value_map[count + 1] = str(name)
+
+            else:
+                color_map.append(
+                    [
+                        np.r_[count + 1, val, alpha]
+                        for count, val in enumerate(legend.values)
+                    ]
+                )
+
         kwargs["value_map"] = value_map
         kwargs["type"] = "referenced"
-        kwargs["color_map"] = color_map
+        kwargs["color_map"] = np.vstack(color_map)
 
         return kwargs
 
