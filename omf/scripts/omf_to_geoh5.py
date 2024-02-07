@@ -6,7 +6,7 @@ from pathlib import Path
 from omf.fileio import OMFReader
 from omf.fileio.geoh5 import GeoH5Writer
 
-_logger = logging.getLogger(__package__)
+_logger = logging.getLogger(__package__ + "." + Path(__file__).stem)
 
 
 def run():
