@@ -36,7 +36,7 @@ def test_geoh5_to_omf_without_output_name(geoh5_input_path: Path):
     """Test the geoh5_to_omf script."""
 
     with patch("sys.argv", ["geoh5_to_omf", str(geoh5_input_path)]):
-        geoh5_to_omf.run()
+        geoh5_to_omf.main()
 
     assert (geoh5_input_path.with_suffix(".omf")).exists()
 
@@ -55,7 +55,7 @@ def test_geoh5_to_omf_with_output_name(
     with patch(
         "sys.argv", ["geoh5_to_omf", str(geoh5_input_path), "-o", f"{output_name}"]
     ):
-        geoh5_to_omf.run()
+        geoh5_to_omf.main()
 
     expected_output = working_dir / output_name
     if not expected_output.suffix:
@@ -82,7 +82,7 @@ def test_geoh5_to_omf_with_absolute_output_path(
             f"{(output_dir / output_name).absolute()}",
         ],
     ):
-        geoh5_to_omf.run()
+        geoh5_to_omf.main()
 
     expected_output = output_dir / output_name
     if not expected_output.suffix:

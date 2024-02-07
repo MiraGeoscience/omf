@@ -9,7 +9,7 @@ from omf.fileio.geoh5 import GeoH5Reader
 _logger = logging.getLogger(__package__ + "." + Path(__file__).stem)
 
 
-def run():
+def main():
     parser = argparse.ArgumentParser(
         prog="geoh5_to_omf",
         description="Converts a geoh5 file to a new OMF file.",
@@ -37,4 +37,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    main()
