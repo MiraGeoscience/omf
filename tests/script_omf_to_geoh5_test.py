@@ -38,7 +38,7 @@ def test_omf_to_geoh5_without_output_name(omf_input_path: Path):
     """Test the omf_to_geoh5 script."""
 
     with patch("sys.argv", ["omf_to_geoh5", str(omf_input_path)]):
-        omf_to_geoh5.run()
+        omf_to_geoh5.main()
 
     assert (omf_input_path.with_suffix(".geoh5")).exists()
 
@@ -57,7 +57,7 @@ def test_omf_to_geoh5_with_output_name(
     with patch(
         "sys.argv", ["omf_to_geoh5", str(omf_input_path), "-o", f"{output_name}"]
     ):
-        omf_to_geoh5.run()
+        omf_to_geoh5.main()
 
     expected_output = working_dir / output_name
     if not expected_output.suffix:
@@ -84,7 +84,7 @@ def test_omf_to_geoh5_with_absolute_output_path(
             f"{(output_dir / output_name).absolute()}",
         ],
     ):
-        omf_to_geoh5.run()
+        omf_to_geoh5.main()
 
     expected_output = output_dir / output_name
     if not expected_output.suffix:
@@ -113,7 +113,7 @@ def test_omf_to_geoh5_with_gzip_level(tmp_path: Path, gzip_level: int):
             f"{output_path.absolute()}",
         ],
     ):
-        omf_to_geoh5.run()
+        omf_to_geoh5.main()
 
     assert output_path.exists()
 
@@ -139,7 +139,7 @@ def test_omf_to_geoh5_with_gzip_level_too_high(capsys, tmp_path: Path):
                 f"{output_path.absolute()}",
             ],
         ):
-            omf_to_geoh5.run()
+            omf_to_geoh5.main()
 
     assert not output_path.exists()
     assert captured_exception.value.code == 2
