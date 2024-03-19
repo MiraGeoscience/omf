@@ -272,22 +272,19 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "geoh5py"
-version = "0.9.0-alpha.2"
+version = "0.9.0a2"
 description = "Python API for geoh5, an open file format for geoscientific data"
 optional = false
-python-versions = "^3.8,<3.11"
+python-versions = ">=3.8,<3.11"
 files = [
-    {file = "0.9.0.zip", hash = "sha256:a7c58b3e3094c91fbde1975e00ae062fad995024fbce7101eaec05c4fd4ff749"},
+    {file = "geoh5py-0.9.0a2-py3-none-any.whl", hash = "sha256:70041ed40bda3caa4fc95b9cf842822ceb0b4337954233a76fcada04daf9fd0f"},
+    {file = "geoh5py-0.9.0a2.tar.gz", hash = "sha256:9062b91e74c821248b18f8dfb72aa4abcc342764085253708657e3b836ff9539"},
 ]
 
 [package.dependencies]
 h5py = ">=3.2.1,<4.0.0"
 numpy = ">=1.23.5,<1.24.0"
 Pillow = ">=10.0.1,<11.0.0"
-
-[package.source]
-type = "url"
-url = "https://github.com/MiraGeoscience/geoh5py/archive/refs/heads/release/0.9.0.zip#sha256="
 
 [[package]]
 name = "h5py"
@@ -1021,4 +1018,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.11"
-content-hash = "566260e8f16f7315426de98196fbfdcff3daec6906c5b505243e939ef2d9273a"
+content-hash = "8768db6330c1070ca08344b6a6b5c8090f56589c3c245be3458da8734476abcf"
