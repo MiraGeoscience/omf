@@ -42,6 +42,7 @@ six = "^1.16"
 vectormath = "~0.2.0"
 
 [tool.poetry.dev-dependencies]
+Pygments = "*"
 pylint = "*"
 pytest = "*"
 pytest-cov = "*"
