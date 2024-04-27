@@ -5,9 +5,10 @@ from __future__ import annotations
 import inspect
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 import numpy as np
 from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
