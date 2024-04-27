@@ -18,21 +18,13 @@ omf
     :alt: pytest
 
 
-Version: 3.2.0-alpha.1
+Version: 3.2.0
 
 API library for Open Mining Format, a new standard for mining data backed by
 the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
 
-.. warning::
-    **Pre-Release Notice**
-
-    This is a Beta release of the Open Mining Format (OMF) and the associated
-    Python API. The storage format and libraries might be changed in
-    backward-incompatible ways and are not subject to any SLA or deprecation
-    policy.
 
 .. warning::
-    **Alpha-Release Notice**
 
     This is a fork created by Mira Geoscience for interoperability with the
     geoh5 file format.
