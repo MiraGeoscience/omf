@@ -2,6 +2,7 @@
 name = "mira-omf"
 version = "3.2.0-rc.1"
 description = "API Library for Open Mining Format"
+license = "MIT"
 authors = [
     "Mira Geoscience <dominiquef@mirageoscience.com>",
     "Global Mining Standards and Guidelines Group <it@seequent.com>",
