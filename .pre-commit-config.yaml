@@ -45,6 +45,7 @@ repos:
     -   id: mypy
         files: ^(omf/fileio/geoh5|tests/)
         additional_dependencies: [
+#            numpy==1.26.*,  # TODO: fix mypy errors related to numpy
             tomli, # to read config from pyproject.toml
             types-six,
             types-toml,
