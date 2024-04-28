@@ -42,6 +42,7 @@ def version_base_and_pre() -> tuple[str, str]:
     """
     version_re = r"^([^-+\s]*)(-\S*)?\s*$"
     match = re.match(version_re, omf.__version__)
+    assert match is not None
     return match[1], match[2]
 
 
