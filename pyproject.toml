@@ -4,11 +4,14 @@ version = "3.2.0-rc.1"
 description = "API Library for Open Mining Format"
 license = "MIT"
 authors = [
-    "Mira Geoscience <dominiquef@mirageoscience.com>",
-    "Global Mining Standards and Guidelines Group <it@seequent.com>",
+    "Mira Geoscience <support@mirageoscience.com>",
+    "Global Mining Guidelines Group <info@gmggroup.org>",
 ]
+maintainers = ["Dominique Fournier <dominiquef@mirageoscience.com>"]
 repository = "https://github.com/MiraGeoscience/omf"
-homepage = "http://www.globalminingstandards.org/"
+#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
+homepage = "https://www.mirageoscience.com/mining-industry-software/python-integration/"
+
 readme = "README.rst"
 keywords = ["geology", "geophysics", "earth sciences"]
 classifiers = [
