@@ -1,7 +1,5 @@
 .. _index:
 
-.. include:: ../README.rst
-
 **Contents:**
 
 .. toctree::
