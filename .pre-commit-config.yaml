@@ -16,19 +16,20 @@ repos:
     hooks:
     -   id: poetry-check
         args: [--lock]
--   repo: https://github.com/psf/black
-    rev: 24.4.2
+-   repo: https://github.com/hadialqattan/pycln
+    rev: v2.4.0
     hooks:
-    -   id: black
-        types: [text]
-        types_or: [python, pyi]
+    -   id: pycln
+        args: [--config=pyproject.toml]
 -   repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
     -   id: isort
         additional_dependencies: [tomli] # to read config from pyproject.toml
-        types: [text]
-        types_or: [python, pyi]
+-   repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+    -   id: black
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.0.0
     hooks:
@@ -50,6 +51,7 @@ repos:
             types-six,
             types-toml,
         ]
+        exclude: ^docs/
 -   repo: https://github.com/codingjoe/relint
     rev: 3.1.1
     hooks:
@@ -63,10 +65,8 @@ repos:
         entry: poetry run pylint
         language: system
         require_serial: true  # pylint does its own parallelism
-        types: [text]
-        types_or: [python, pyi]
+        types: [python]
         files: ^(omf/fileio/geoh5|tests/)
-        exclude: ^(devtools|docs)/
 #    -   id: check-copyright  # TODO: add missing copyright statements in source files
 #        name: Check copyright
 #        entry: python devtools/check-copyright.py
@@ -95,6 +95,8 @@ repos:
     hooks:
     -   id: trailing-whitespace
         exclude: \.mdj$
+    -   id: check-json
+        exclude_types: [jupyter]
     -   id: check-toml
     -   id: check-yaml
 #    -   id: check-added-large-files # crashing on some configuration. To be investigated
@@ -107,6 +109,15 @@ repos:
     -   id: mixed-line-ending
         exclude: ^\.idea/.*\.xml$
     -   id: name-tests-test
+    -   id: pretty-format-json
+        args:
+            - --autofix
+            - --indent=4
+            - --no-sort-keys
+            - --top-keys
+            - version,title,icon,documentation,conda_environment,run_command,geoh5,monitoring_directory,workspace_geoh5
+        exclude_types: [jupyter]
+        exclude: ^docs/(.*/)?images/
 -   repo: https://github.com/rstcheck/rstcheck
     rev: v6.2.0
     hooks:
