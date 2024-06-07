@@ -17,9 +17,6 @@ on:
       - feature/**
       - hotfix/**
 
-env:
-  source_dir: omf
-
 jobs:
   pytest:
     name: pytest (Windows)
@@ -63,7 +60,7 @@ jobs:
       - name: Install dependencies
         run: poetry install -vvv
       - name: pytest
-        run: poetry run pytest --cov-report=xml --cov=${source_dir} --cov-branch --cov-fail-under=79
+        run: poetry run pytest --cov --cov-report=xml
       - name: Codecov
         if: ${{ success() && matrix.python_ver == '3.10' }}
         uses: codecov/codecov-action@v4
