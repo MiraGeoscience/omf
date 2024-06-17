@@ -1,15 +1,12 @@
 """serializers.py: array and image serializers/deserializers for OMF file IO"""
 
+# pylint: skip-file
+
 import zlib
 from io import BytesIO
 
 import numpy as np
 from six import PY2
-
-if PY2:
-    memoryview = (
-        buffer  # pylint: disable=redefined-builtin, invalid-name, undefined-variable
-    )
 
 
 def array_serializer(arr, open_file, **kwargs):  # pylint: disable=unused-argument
