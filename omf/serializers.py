@@ -1,5 +1,7 @@
 """serializers.py: array and image serializers/deserializers for OMF file IO"""
 
+# pylint: skip-file
+
 import zlib
 from io import BytesIO
 

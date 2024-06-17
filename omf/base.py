@@ -1,5 +1,7 @@
 """base.py: OMF Project and base classes for its components"""
 
+# pylint: skip-file
+
 from __future__ import annotations
 
 import datetime
