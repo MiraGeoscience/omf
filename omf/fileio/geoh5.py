@@ -5,9 +5,10 @@ from __future__ import annotations
 import inspect
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 import numpy as np
 from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
@@ -619,7 +620,7 @@ class ReferenceMapConversion(ArrayConversion):
     of :obj:`geoh5py.data.referenced_data`.
     """
 
-    geoh5_type = ReferencedData
+    geoh5_type = ReferencedData  # type: ignore
 
     def collect_attributes(  # type: ignore
         self,
@@ -647,7 +648,7 @@ class ReferenceMapConversion(ArrayConversion):
         if not element.legends:
             return kwargs
 
-        alpha = 1.0
+        alpha = 255
         value_map = {0: "Unknown"}
         color_map = [np.r_[0, [0, 0, 0], alpha]]
 
@@ -754,7 +755,7 @@ class ColormapConversion(ArrayConversion):
         colors = np.vstack(colormap.gradient.array)
         values = np.linspace(colormap.limits[0], colormap.limits[1], colors.shape[0])
 
-        kwargs["color_map"] = np.c_[values, colors, np.ones_like(values)]
+        kwargs["color_map"] = np.c_[values, colors, np.ones_like(values) * 255]
         return kwargs
 
     @staticmethod
