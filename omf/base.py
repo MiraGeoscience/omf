@@ -1,4 +1,5 @@
 """base.py: OMF Project and base classes for its components"""
+
 from __future__ import annotations
 
 import datetime

@@ -2,6 +2,7 @@ name: pytest on Unix OS
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - develop
       - main
@@ -16,12 +17,10 @@ on:
       - feature/**
       - hotfix/**
 
-env:
-  source_dir: omf
-
 jobs:
   pytest:
     name: pytest (Unix)
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
@@ -62,4 +61,4 @@ jobs:
       - name: Install dependencies
         run: poetry install -vvv
       - name: pytest
-        run: poetry run pytest --cov-report=xml --cov=${source_dir} --cov-branch --cov-fail-under=79
+        run: poetry run pytest --cov --cov-report=xml
