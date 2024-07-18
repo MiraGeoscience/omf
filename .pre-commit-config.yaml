@@ -41,7 +41,7 @@ repos:
     -   id: pyupgrade
         args: [--py39-plus]
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.10.1
     hooks:
     -   id: mypy
         files: ^(omf/fileio/geoh5|tests/)
@@ -58,6 +58,11 @@ repos:
     -   id: relint
         args: [-W]  # to fail on warnings
         files: ^omf/fileio/geoh5/
+-   repo: http://github.com/MiraGeoscience/pre-commit-hooks
+    rev: v1.0.0
+    hooks:
+    -   id: prepare-commit-msg
+    -   id: check-commit-msg
 -   repo: local
     hooks:
     -   id: pylint
@@ -67,25 +72,8 @@ repos:
         require_serial: true  # pylint does its own parallelism
         types: [python]
         files: ^(omf/fileio/geoh5|tests/)
-#    -   id: check-copyright  # TODO: add missing copyright statements in source files
-#        name: Check copyright
-#        entry: python devtools/check-copyright.py
-#        language: python
-#        types: [text]
-#        exclude: (^\.|^docs/)
-#        files: ^(LICENSE|README(-dev)?.rst|((devtools|omf/fileio/geoh5|tests)/.*\.pyi?))$
-    -   id: prepare-commit-msg
-        stages: [prepare-commit-msg]
-        name: Prepare commit message
-        entry: python devtools/git_message_hook.py --prepare
-        language: python
-    -   id: check-commit-msg
-        stages: [commit-msg]
-        name: Check commit message
-        entry: python devtools/git_message_hook.py --check
-        language: python
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
     -   id: codespell
         exclude: (\.lock|\.ipynb|^THIRD_PARTY_SOFTWARE\.rst)$
@@ -119,7 +107,7 @@ repos:
         exclude_types: [jupyter]
         exclude: ^docs/(.*/)?images/
 -   repo: https://github.com/rstcheck/rstcheck
-    rev: v6.2.0
+    rev: v6.2.4
     hooks:
     -   id: rstcheck
         exclude: ^THIRD_PARTY_SOFTWARE.rst$
