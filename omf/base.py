@@ -68,9 +68,7 @@ class UidModel(properties.HasProperties):
         return str(self.uid)
 
     @classmethod
-    def deserialize(
-        cls, uid, trusted=True, registry=None, **kwargs
-    ):  # pylint: disable=arguments-differ
+    def deserialize(cls, uid, trusted=True, registry=None, **kwargs):  # pylint: disable=arguments-differ
         """Deserialize nested UidModels from flat pointer dictionary"""
         if registry is None:
             raise ValueError("no registry provided")
@@ -161,8 +159,7 @@ class ProjectElement(ContentModel):
         assert self.geometry is not None, "ProjectElement must have a mesh"
         for i, dat in enumerate(self.data):
             if (
-                dat.location
-                not in self.geometry._valid_locations  # pylint: disable=protected-access
+                dat.location not in self.geometry._valid_locations  # pylint: disable=protected-access
             ):
                 raise ValueError(
                     f"Invalid location {dat.location} - valid values: "
