@@ -34,6 +34,7 @@ from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from omf.volume import VolumeElement, VolumeGridGeometry
 
+
 _logger = logging.getLogger(__package__)
 
 
@@ -481,7 +482,7 @@ class ProjectConversion(BaseConversion):
             kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
-            getattr(project, "_backend").update({"uid": uid})  # pylint: disable=W0212
+            project._backend.update({"uid": uid})  # pylint: disable=W0212
             project.elements = self.process_dependents(
                 entity,
                 project,

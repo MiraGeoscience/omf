@@ -270,7 +270,7 @@ class MappedData(ProjectElementData):
         for legend in self.legends:  # pylint: disable=not-an-iterable
             if np.max(self.indices.array) >= len(legend.values):  # pylint: disable=no-member
                 raise ValueError(
-                    "Indices of DataMap {dm} exceed number of available "
-                    "entries in Legend {leg}".format(dm=self.name, leg=legend.name)
+                    f"Indices of DataMap {self.name} exceed number of available "
+                    f"entries in Legend {legend.name}"
                 )
         return True
