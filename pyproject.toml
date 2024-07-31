@@ -76,6 +76,10 @@ ignore = [
     "B028",  # no-explicit-stacklevel for warnings.warn()
     "E501",  # line-too-long - code is reformatted (do not care about comments and docstring)
     "F401",  # unsused-import - covered by pycln
+    "RUF005", # TO DO
+    "RUF012", # TO DO
+    "UP038", # TO DO
+    "C408", # TO DO
 ]
 select = [
     "A",  # flake8-builtins
