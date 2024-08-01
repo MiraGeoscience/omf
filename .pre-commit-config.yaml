@@ -53,8 +53,8 @@ repos:
 -   repo: https://github.com/MiraGeoscience/pre-commit-hooks
     rev: v1.0.1
     hooks:
-    -  id: check-copyright
-    files: ^(LICENSE|README(-dev)?.rst|((devtools|omf/fileio/geoh5|tests)/.*\.pyi?))$
+    -   id: check-copyright
+        files: ^(LICENSE|README(-dev)?.rst|((devtools|omf/fileio/geoh5|tests)/.*\.pyi?))$
     -   id: prepare-commit-msg
 #    -   id: check-copyright  # TODO: add missing copyright statements in source files
 -   repo: local
