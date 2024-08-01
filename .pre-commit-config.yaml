@@ -56,7 +56,6 @@ repos:
     -   id: check-copyright
         files: ^((devtools|omf/fileio/geoh5|tests)/.*\.pyi?)$
     -   id: prepare-commit-msg
-#    -   id: check-copyright  # TODO: add missing copyright statements in source files
 -   repo: local
     hooks:
     -   id: pylint
