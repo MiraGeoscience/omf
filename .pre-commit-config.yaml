@@ -29,14 +29,14 @@ repos:
         -   --fix
         -   --exit-non-zero-on-fix
 #        -   --unsafe-fixes
-        files: ^(omf/fileio/geoh5|tests/)
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
     -   id: ruff-format
-        files: ^(omf/fileio/geoh5|tests/)
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.11.0
     hooks:
     -   id: mypy
-        files: ^(omf/fileio/geoh5|tests/)
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
         additional_dependencies: [
 #            numpy==1.26.*,  # TODO: fix mypy errors related to numpy
             tomli, # to read config from pyproject.toml
@@ -49,12 +49,12 @@ repos:
     hooks:
     -   id: relint
         args: [-W]  # to fail on warnings
-        files: ^omf/fileio/geoh5/
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
 -   repo: https://github.com/MiraGeoscience/pre-commit-hooks
     rev: v1.0.1
     hooks:
     -   id: check-copyright
-        files: ^((devtools|omf/fileio/geoh5|tests)/.*\.pyi?)$
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
     -   id: prepare-commit-msg
 -   repo: local
     hooks:
@@ -64,7 +64,7 @@ repos:
         language: system
         require_serial: true  # pylint does its own parallelism
         types: [python]
-        files: ^(omf/fileio/geoh5|tests/)
+        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
 -   repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
