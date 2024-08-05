@@ -1,5 +1,7 @@
 """Tests for PointSet validation"""
 
+from pathlib import Path
+
 import numpy as np
 from geoh5py.objects import BlockModel
 from geoh5py.workspace import Workspace
@@ -8,7 +10,7 @@ import omf
 from omf.fileio.geoh5 import block_model_reordering
 
 
-def test_volume_to_geoh5(tmp_path):
+def test_volume_to_geoh5(tmp_path: Path):
     """Test pointset geometry validation"""
     dims = [10, 15, 20]
     vol = omf.VolumeElement(

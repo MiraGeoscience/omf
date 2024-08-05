@@ -34,6 +34,7 @@ from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from omf.volume import VolumeElement, VolumeGridGeometry
 
+
 _logger = logging.getLogger(__package__)
 
 
@@ -425,7 +426,10 @@ class ElementConversion(BaseConversion):
                 element._backend.update({"uid": uid})  # pylint: disable=W0212
 
             element.data = self.process_dependents(
-                entity, element, workspace, self.compression  # type: ignore
+                entity,
+                element,
+                workspace,
+                self.compression,  # type: ignore
             )
 
         return element
@@ -478,9 +482,12 @@ class ProjectConversion(BaseConversion):
             kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
-            getattr(project, "_backend").update({"uid": uid})  # pylint: disable=W0212
+            project._backend.update({"uid": uid})  # pylint: disable=W0212
             project.elements = self.process_dependents(
-                entity, project, workspace, self.compression  # type: ignore
+                entity,
+                project,
+                workspace,
+                self.compression,  # type: ignore
             )
 
         return project
@@ -976,8 +983,9 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
         with fetch_h5_handle(workspace):
             geometry = {}
             for key, alias in cls._attribute_map.items():
-                cell_size, count = getattr(entity, f"{alias}_cell_size"), getattr(
-                    entity, f"{alias}_count"
+                cell_size, count = (
+                    getattr(entity, f"{alias}_cell_size"),
+                    getattr(entity, f"{alias}_count"),
                 )
                 tensor = np.ones(count) * np.abs(cell_size)
                 geometry.update({f"tensor_{key}": tensor})

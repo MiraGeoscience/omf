@@ -87,8 +87,8 @@ class SurfaceGridGeometry(ProjectElementGeometry):
             return True
         if len(self.offset_w) != self.num_nodes:
             raise ValueError(
-                "Length of offset_w, {zlen}, must equal number of nodes, "
-                "{nnode}".format(zlen=len(self.offset_w), nnode=self.num_nodes)
+                f"Length of offset_w, {len(self.offset_w)}, must equal number of nodes, "
+                f"{self.num_nodes}"
             )
         return True
 

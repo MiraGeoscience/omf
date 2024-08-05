@@ -4,7 +4,6 @@ import zlib
 from io import BytesIO
 
 import numpy as np
-from six import PY2
 
 
 def array_serializer(arr, open_file, **kwargs):  # pylint: disable=unused-argument
