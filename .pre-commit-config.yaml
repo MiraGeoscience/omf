@@ -34,25 +34,25 @@ repos:
     rev: v1.11.0
     hooks:
     -   id: mypy
-        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
         additional_dependencies: [
 #            numpy==1.26.*,  # TODO: fix mypy errors related to numpy
             tomli, # to read config from pyproject.toml
             types-six,
             types-toml,
         ]
+        files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
         exclude: ^docs/
 -   repo: https://github.com/codingjoe/relint
     rev: 3.1.1
     hooks:
     -   id: relint
         args: [-W]  # to fail on warnings
-        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
+        files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
 -   repo: https://github.com/MiraGeoscience/pre-commit-hooks
     rev: v1.0.1
     hooks:
 #    -   id: check-copyright  # no copyright nor license notice: differ to upstream repo
-#        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
+#        files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
     -   id: prepare-commit-msg
 -   repo: local
     hooks:
