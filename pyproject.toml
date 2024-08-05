@@ -117,6 +117,9 @@ plugins = [
 #    "numpy.typing.mypy_plugin"
 ]
 
+[tool.pylint.MASTER]
+ignore-paths = '^(?!.*(omf/fileio/|omf/scripts/|tests/)).*$'
+
 [tool.pytest.ini_options]
 
 [tool.coverage.run]
