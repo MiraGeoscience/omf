@@ -70,13 +70,22 @@ tomli = "*"  # for tests only
 [tool.ruff]
 target-version = "py39"
 
-[tool.ruff.lint]
 exclude = [
-    "^docs/",
+    "docs/*",
     # skip source files from upstream repo
-    "^omf/fileio/(fileio|utils)[.]py$",
-    "^omf/(base|data|lineset|pointset|serializers|surface|texture|volume)[.]py$",
+    "omf/fileio/fileio.py",
+    "omf/fileio/utils.py",
+    "omf/base.py",
+    "omf/data.py",
+    "omf/lineset.py",
+    "omf/pointset.py",
+    "omf/serializers.py",
+    "omf/surface.py",
+    "omf/texture.py",
+    "omf/volume.py",
 ]
+
+[tool.ruff.lint]
 ignore = [
     "B028",  # no-explicit-stacklevel for warnings.warn()
     "E501",  # line-too-long - code is reformatted (do not care about comments and docstring)
@@ -108,13 +117,6 @@ max-complexity = 18
 lines-after-imports = 2
 
 [tool.ruff.format]
-exclude = [
-    "^docs/",
-    # skip source files from upstream repo
-    "^omf/fileio/(fileio|utils)[.]py$",
-    "^omf/(base|data|lineset|pointset|serializers|surface|texture|volume)[.]py$",
-]
-
 # default formatting is just fine
 
 [tool.mypy]

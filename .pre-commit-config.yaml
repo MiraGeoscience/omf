@@ -29,9 +29,7 @@ repos:
         -   --fix
         -   --exit-non-zero-on-fix
 #        -   --unsafe-fixes
-        exclude: ^docs/
     -   id: ruff-format
-        exclude: ^docs/
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.11.0
     hooks:
