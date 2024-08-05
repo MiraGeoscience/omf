@@ -53,8 +53,8 @@ repos:
 -   repo: https://github.com/MiraGeoscience/pre-commit-hooks
     rev: v1.0.1
     hooks:
-    -   id: check-copyright
-        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
+#    -   id: check-copyright  # no copyright nor license notice: differ to upstream repo
+#        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
     -   id: prepare-commit-msg
 -   repo: local
     hooks:
