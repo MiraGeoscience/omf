@@ -46,9 +46,8 @@ ignore=CVS
 
 # Add files or directories matching the regex patterns to the ignore-list. The
 # regex matches against paths and can be in Posix or Windows format.
-ignore-paths=^omf/fileio/fileio\.py$,  # skip source files from upstream repo
-             ^omf/fileio/utils\.py$,
-             ^omf/[^/]+$
+ignore-paths=^omf/fileio/(fileio|utils)[.]py$,  # skip source files from upstream repo
+             ^omf/(base|data|lineset|pointset|serializers|surface|texture|volume)[.]py$
 
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths. The default value ignores Emacs file
