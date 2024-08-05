@@ -157,7 +157,6 @@ class BaseConversion(ABC):
     }
     _geoh5 = None
     _parent = None
-    _mapping = None
 
     def __init__(
         self,
