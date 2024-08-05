@@ -1,12 +1,14 @@
 """Tests for PointSet validation"""
 
+from pathlib import Path
+
 import numpy as np
 from geoh5py.workspace import Workspace
 
 import omf
 
 
-def test_lineset_to_geoh5(tmp_path):
+def test_lineset_to_geoh5(tmp_path: Path):
     """Test pointset geometry validation"""
     line = omf.LineSetElement(
         name="Random Line",
