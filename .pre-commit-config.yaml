@@ -64,7 +64,7 @@ repos:
         language: system
         require_serial: true  # pylint does its own parallelism
         types: [python]
-        files: ^(omf/fileio/geoh5|omf/scripts|tests)/
+        exclude: ^docs/
 -   repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
