@@ -29,6 +29,7 @@ from .surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from .texture import ImageTexture
 from .volume import VolumeElement, VolumeGridGeometry
 
+
 __version__ = "3.3.0-alpha.1"
 __author__ = "Global Mining Standards and Guidelines Group"
 __license__ = "MIT License"
