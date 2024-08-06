@@ -151,7 +151,7 @@ class BaseConversion(ABC):
 
     geoh5_type: type[Entity]
     omf_type: type[UidModel]
-    _attribute_map: dict = {  # noqa: RUF012
+    _attribute_map: dict = {
         "uid": "uid",
         "name": "name",
     }
@@ -290,7 +290,7 @@ class DataConversion(BaseConversion):
     :obj:`geoh5py.data.Data`
     """
 
-    _attribute_map: dict[str, Any] = {  # noqa: RUF012
+    _attribute_map: dict[str, Any] = {
         "uid": "uid",
         "name": "name",
     }
@@ -368,7 +368,7 @@ class ElementConversion(BaseConversion):
     :param compression: Compression level for data.
     """
 
-    _attribute_map: dict[str, Any] = {  # noqa: RUF012
+    _attribute_map: dict[str, Any] = {
         "name": "name",
         "uid": "uid",
     }
@@ -441,7 +441,7 @@ class ProjectConversion(BaseConversion):
 
     omf_type = Project
     geoh5_type = RootGroup
-    _attribute_map: dict = {  # noqa: RUF012
+    _attribute_map: dict = {
         "uid": "uid",
         "name": "name",
         "units": "distance_unit",
@@ -499,7 +499,7 @@ class ArrayConversion(BaseConversion):
 
     omf_type = ScalarArray
     geoh5_type = Data
-    _attribute_map: dict = {"array": "values"}  # noqa: RUF012
+    _attribute_map: dict = {"array": "values"}
 
     def from_omf(self, element: UidModel, **kwargs) -> dict:
         """
@@ -617,7 +617,7 @@ class StringArrayConversion(ArrayConversion):
     """
 
     omf_type = StringArray
-    geoh5_type = list
+    geoh5_type = list  # type: ignore
 
 
 class ReferenceMapConversion(ArrayConversion):
@@ -626,7 +626,7 @@ class ReferenceMapConversion(ArrayConversion):
     of :obj:`geoh5py.data.referenced_data`.
     """
 
-    geoh5_type = ReferencedData
+    geoh5_type = ReferencedData  # type: ignore
 
     def collect_attributes(  # type: ignore
         self,
@@ -732,7 +732,7 @@ class ColormapConversion(ArrayConversion):
 
     omf_type = ScalarColormap
     geoh5_type = Data
-    _attribute_map: dict = {"colormap": "color_map"}  # noqa: RUF012
+    _attribute_map: dict = {"colormap": "color_map"}
 
     def collect_attributes(
         self, element: UidModel | Entity, workspace: str | Workspace | Path, **kwargs
@@ -871,7 +871,7 @@ class PointSetGeometryConversion(BaseGeometryConversion):
 
     omf_type = PointSetGeometry
     geoh5_type = Points
-    _attribute_map: dict = {"vertices": "vertices"}  # noqa: RUF012
+    _attribute_map: dict = {"vertices": "vertices"}
 
 
 class LineSetGeometryConversion(BaseGeometryConversion):
@@ -882,7 +882,7 @@ class LineSetGeometryConversion(BaseGeometryConversion):
 
     omf_type = LineSetGeometry
     geoh5_type = Curve
-    _attribute_map: dict = {"vertices": "vertices", "segments": "cells"}  # noqa: RUF012
+    _attribute_map: dict = {"vertices": "vertices", "segments": "cells"}
 
 
 class SurfaceGeometryConversion(BaseGeometryConversion):
@@ -893,7 +893,7 @@ class SurfaceGeometryConversion(BaseGeometryConversion):
 
     omf_type = SurfaceGeometry
     geoh5_type = Surface
-    _attribute_map: dict = {"vertices": "vertices", "triangles": "cells"}  # noqa: RUF012
+    _attribute_map: dict = {"vertices": "vertices", "triangles": "cells"}
 
 
 class SurfaceGridGeometryConversion(BaseGeometryConversion):
@@ -904,7 +904,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
 
     omf_type = SurfaceGridGeometry
     geoh5_type = Grid2D
-    _attribute_map: dict = {  # noqa: RUF012
+    _attribute_map: dict = {
         "u": "u",
         "v": "v",
     }
@@ -1021,7 +1021,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
 
     omf_type = VolumeGridGeometry
     geoh5_type = BlockModel
-    _attribute_map: dict = {"u": "u", "v": "v", "w": "z"}  # noqa: RUF012
+    _attribute_map: dict = {"u": "u", "v": "v", "w": "z"}
 
     def __init__(
         self,
