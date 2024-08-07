@@ -155,9 +155,6 @@ class BaseConversion(ABC):
         "uid": "uid",
         "name": "name",
     }
-    _geoh5 = None
-    _parent = None
-    _mapping = None
 
     def __init__(
         self,
@@ -169,7 +166,9 @@ class BaseConversion(ABC):
         if element is None:
             raise ValueError("Input 'element' cannot be None.")
 
+        self._geoh5 = None
         self.geoh5 = geoh5
+
         self.compression = compression
         self._parent = parent
 
