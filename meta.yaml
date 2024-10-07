@@ -23,7 +23,7 @@ requirements:
     - python >=3.9.0,<3.11
     - numpy >=1.26.0,<1.27.0
     - properties >=0.6.0,<0.7.0
-    - pypng 20220715.*
+    - pypng 0.20220715.*
     - six >=1.16.0,<1.17.0
     - vectormath >=0.2.0,<0.3.0
     - geoh5py >=0.9.1a0.dev0,<0.11.0
