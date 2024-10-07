@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  path: ../{{ name}}
+  path: ../omf
 
 build:
   noarch: python
