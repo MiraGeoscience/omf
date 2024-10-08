@@ -45,7 +45,7 @@ geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
 omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 
 numpy = "~1.26.0"  # also in geoh5py
 properties = "~0.6.0"
@@ -55,8 +55,8 @@ vectormath = "~0.2.0"
 
 ## dependencies from Git repositories
 #------------------------------------
-geoh5py = {version = ">=0.9.1, <0.11", allow-prereleases = true}
-#geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
+#geoh5py = {version = ">=0.9.1, <0.11", allow-prereleases = true}
+geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "release/0.10.0"}
 #geoh5py = {path = "../geoh5py", develop = true}
 
 [tool.poetry.group.dev.dependencies]
