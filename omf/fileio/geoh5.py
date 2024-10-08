@@ -68,7 +68,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
         file_name: str | Path,
         compression: int = 5,
     ):
-        if not isinstance(file_name, (str, Path)):
+        if not isinstance(file_name, str | Path):
             raise TypeError("Input 'file' must be of str or Path.")
 
         self.file = file_name
