@@ -11,7 +11,7 @@ jobs:
     with:
       package-name: 'mira-omf'
       python-version: '3.10'
-      virtual-repo-name: 'public-conda-prod'
+      virtual-repo-names: '["public-conda-prod"]'
     secrets:
       JFROG_ARTIFACTORY_URL: ${{ secrets.JFROG_ARTIFACTORY_URL }}
       JFROG_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
@@ -23,7 +23,7 @@ jobs:
       package-name: 'mira-omf'
       version-tag: ${{ github.ref_name }}
       python-version: '3.10'
-      virtual-repo-name: 'public-pypi-prod'
+      virtual-repo-names: '["public-pypi-prod"]'
     secrets:
       JFROG_ARTIFACTORY_URL: ${{ secrets.JFROG_ARTIFACTORY_URL }}
       JFROG_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
