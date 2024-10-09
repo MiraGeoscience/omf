@@ -141,4 +141,3 @@ dmypy.json
 
 # geoh5 locks
 *.geoh5.lock
-/.jfrog/projects/poetry.yaml
