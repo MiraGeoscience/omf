@@ -22,11 +22,11 @@ requirements:
   run:
     - python >=3.9.0,<3.11
     - numpy >=1.26.0,<1.27.0
-    - properties >=0.6.0,<0.7.0
+    - properties >=0.6
     - pypng 0.20220715.*
-    - six >=1.16.0,<2.0.0
-    - vectormath >=0.2.0,<0.3.0
-    - geoh5py >=0.9.1a0.dev0,<0.11.0
+    - six >=1.16.0
+    - vectormath >=0.2.0
+    - geoh5py >=0.9.1a0.dev0,<0.11.0a0.dev0
 
 test:
   imports:
