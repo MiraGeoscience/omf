@@ -67,6 +67,12 @@ pytest-cov = "*"
 sphinx = "^5.3"
 tomli = "*"  # for tests only
 
+
+[[tool.poetry.source]]
+name = "public"
+url = "https://mirageoscienceltd.jfrog.io/artifactory/api/pypi/public-pypi-dev/simple"
+priority = "supplemental"
+
 [tool.ruff]
 target-version = "py39"
 
