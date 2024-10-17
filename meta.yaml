@@ -1,0 +1,39 @@
+{% set name = "mira-omf" %}
+{% set version = "3.4.0a1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: ../omf
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.10.0,<3.11
+    - poetry-core >=1.0.0
+    - setuptools
+    - pip
+  run:
+    - python >=3.9.0,<3.11
+    - numpy >=1.26.0,<1.27.0
+    - properties >=0.6
+    - pypng 0.20220715.*
+    - six >=1.16.0
+    - vectormath >=0.2.0
+    - geoh5py >=0.9.1a0.dev0,<0.11.0a0.dev0
+
+about:
+  license: MIT
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - SophieCurinier
+    - sebhmg
