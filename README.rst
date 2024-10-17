@@ -18,7 +18,7 @@ omf
     :alt: pytest
 
 
-Version: 3.4.0-alpha.1
+Version: 3.3.0-alpha.1
 
 API library for Open Mining Format, a new standard for mining data backed by
 the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
