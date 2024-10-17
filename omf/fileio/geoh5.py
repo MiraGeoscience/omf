@@ -68,7 +68,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
         file_name: str | Path,
         compression: int = 5,
     ):
-        if not isinstance(file_name, (str, Path)):
+        if not isinstance(file_name, str | Path):
             raise TypeError("Input 'file' must be of str or Path.")
 
         self.file = file_name
@@ -685,7 +685,10 @@ class ReferenceMapConversion(ArrayConversion):
         element: ReferencedData, workspace: str | Workspace | Path, **kwargs
     ) -> dict:
         with fetch_h5_handle(workspace):
-            labels = list(element.value_map.map.values())
+            if element.value_map is None:
+                return kwargs
+
+            labels = list(element.value_map().values())
             ind = 0
             if "Unknown" in labels:
                 ind = 1
