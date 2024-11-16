@@ -30,7 +30,7 @@ from .texture import ImageTexture
 from .volume import VolumeElement, VolumeGridGeometry
 
 
-__version__ = "3.3.0-alpha.2"
+__version__ = "3.3.0-beta.1"
 __author__ = "Global Mining Standards and Guidelines Group"
 __license__ = "MIT License"
 __copyright__ = "Copyright 2017 Global Mining Standards and Guidelines Group"

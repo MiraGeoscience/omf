@@ -1,5 +1,5 @@
 {% set name = "mira-omf" %}
-{% set version = "3.3.0a2" %}
+{% set version = "3.3.0b1" %}
 
 package:
   name: {{ name|lower }}
