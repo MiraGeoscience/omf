@@ -26,7 +26,7 @@ requirements:
     - pypng 0.20220715.*
     - six >=1.16.0
     - vectormath >=0.2.0
-    - geoh5py >=0.9.1a.dev,<0.11.0a.dev
+    - geoh5py >=0.10.0b1,<0.11.0a.dev
 
 about:
   license: MIT
