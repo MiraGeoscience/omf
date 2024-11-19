@@ -48,10 +48,10 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 python = "^3.10"
 
 numpy = "~1.26.0"  # also in geoh5py
-properties = "~0.6.0"
+properties = "0.6.*"
 pypng = "^0.20220715"
 six = "^1.16"
-vectormath = "~0.2.0"
+vectormath = "0.2.*"
 
 ## dependencies from Git repositories
 #------------------------------------
