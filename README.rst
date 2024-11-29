@@ -63,7 +63,7 @@ This library makes use of the `properties <https://github.com/seequent/propertie
 open-source project, which is designed and publicly supported by
 `Seequent <https://seequent.com>`_.
 
-Connection to the geoh5 format makes use of `geoh5py <https://geoh5py.readthedocs.io/>`_
+Connection to the geoh5 format makes use of `geoh5py <https://mirageoscience-geoh5py.readthedocs-hosted.com/>`_
 publicly supported by `Mira Geoscience <https://mirageoscience.com/>`_
 
 Installation
