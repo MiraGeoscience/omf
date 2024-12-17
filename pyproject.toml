@@ -65,6 +65,9 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 sphinx = "^5.3"
+pyyaml = '*'
+jinja2 = '*'
+packaging = '*'
 tomli = "*"  # for tests only
 
 [tool.ruff]
