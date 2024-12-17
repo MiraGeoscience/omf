@@ -39,6 +39,7 @@ repos:
             tomli, # to read config from pyproject.toml
             types-six,
             types-toml,
+            types-PyYAML
         ]
         files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
         exclude: ^docs/
