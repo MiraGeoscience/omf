@@ -32,12 +32,12 @@ packages = [
 ]
 
 include = [
-    { path = "COPYING", format = ["sdist", "wheel"] },
-    { path = "COPYING.LESSER", format = ["sdist", "wheel"] },
-    { path = "LICENSE", format = ["sdist", "wheel"] },
-    { path = "README.rst", format = ["sdist", "wheel"] },
-    { path = "THIRD_PARTY_SOFTWARE.rst", format = ["sdist", "wheel"] },
-    { path = "docs/**/THIRD_PARTY_SOFTWARE.rst", format = ["sdist", "wheel"] },
+    { path = "COPYING" },
+    { path = "COPYING.LESSER" },
+    { path = "LICENSE" },
+    { path = "README.rst" },
+    { path = "THIRD_PARTY_SOFTWARE.rst" },
+    { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
 
 [tool.poetry.scripts]
@@ -48,10 +48,10 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 python = "^3.10"
 
 numpy = "~1.26.0"  # also in geoh5py
-properties = "~0.6.0"
+properties = "0.6.*"
 pypng = "^0.20220715"
 six = "^1.16"
-vectormath = "~0.2.0"
+vectormath = "0.2.*"
 
 ## dependencies from Git repositories
 #------------------------------------
@@ -65,6 +65,9 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 sphinx = "^5.3"
+pyyaml = '*'
+jinja2 = '*'
+packaging = '*'
 tomli = "*"  # for tests only
 
 [tool.ruff]

@@ -15,7 +15,7 @@ build:
 
 requirements:
   host:
-    - python >=3.10.0,<3.11
+    - python >=3.10.0,<4.0.0
     - poetry-core >=1.0.0
     - setuptools
     - pip
@@ -26,7 +26,7 @@ requirements:
     - pypng 0.20220715.*
     - six >=1.16.0
     - vectormath >=0.2.0
-    - geoh5py >=0.9.1a0.dev0,<0.11.0a0.dev0
+    - geoh5py >=0.10.0b1,<0.11.0a.dev
 
 about:
   license: MIT
