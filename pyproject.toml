@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mira-omf"
-version = "3.3.0-beta.2"
+version = "3.3.0-rc.1"
 description = "API Library for Open Mining Format"
 license = "MIT"
 authors = [
