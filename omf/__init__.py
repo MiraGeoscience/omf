@@ -1,5 +1,19 @@
 """omf: API library for Open Mining Format file interchange format"""
 
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2022-2025 Mira Geoscience Ltd.                                '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2017 Global Mining Standards and Guidelines Group             '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 import logging
 import sys
 
@@ -31,9 +45,12 @@ from .volume import VolumeElement, VolumeGridGeometry
 
 
 __version__ = "3.3.0-rc.1"
-__author__ = "Global Mining Standards and Guidelines Group"
+__author__ = "Global Mining Standards and Guidelines Group, Mira Geoscience Ltd."
 __license__ = "MIT License"
-__copyright__ = "Copyright 2017 Global Mining Standards and Guidelines Group"
+__copyright__ = (
+    "Copyright 2017 Global Mining Standards and Guidelines Group, "
+    "Copyright 2022-2025 Mira Geoscience Ltd."
+)
 
 
 def _create_logger():
