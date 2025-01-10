@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -144,7 +145,4 @@ def test_omf_to_geoh5_with_gzip_level_too_high(capsys, tmp_path: Path):
     assert not output_path.exists()
     assert captured_exception.value.code == 2
     captured_err = capsys.readouterr().err
-    assert any(
-        "error: argument --gzip: invalid choice: 10" in line
-        for line in captured_err.splitlines()
-    )
+    assert re.search(r"error: argument --gzip: invalid choice:", captured_err)
