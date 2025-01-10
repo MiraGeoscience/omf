@@ -52,9 +52,30 @@ repos:
 -   repo: https://github.com/MiraGeoscience/pre-commit-hooks
     rev: v1.0.2
     hooks:
-#    -   id: check-copyright  # no copyright nor license notice: differ to upstream repo
-#        files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
+    -   id: check-copyright
+        files: (^package\.rst|^LICENSE|^README(|-dev)\.rst|\.py|\.pyi)$
+        # do not check sources from the original omf package
+        exclude: |
+            (?x)(
+                ^\.|
+                ^docs/|
+                omf/(
+                fileio/__init__|
+                fileio/fileio|
+                fileio/utils|
+                __init__|
+                base|
+                data|
+                lineset|
+                pointset|
+                serializers|
+                surface|
+                texture|
+                volume).py|
+                tests/doc_example_test.py
+            )$
     -   id: prepare-commit-msg
+    -   id: check-commit-msg
 -   repo: local
     hooks:
     -   id: pylint
