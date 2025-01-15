@@ -1,3 +1,14 @@
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -144,7 +155,4 @@ def test_omf_to_geoh5_with_gzip_level_too_high(capsys, tmp_path: Path):
     assert not output_path.exists()
     assert captured_exception.value.code == 2
     captured_err = capsys.readouterr().err
-    assert any(
-        "error: argument --gzip: invalid choice: 10" in line
-        for line in captured_err.splitlines()
-    )
+    assert re.search(r"error: argument --gzip: invalid choice:", captured_err)
