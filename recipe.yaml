@@ -1,17 +1,20 @@
-{% set name = "mira-omf" %}
-{% set version = "3.3.0b2" %}
+schema_version: 1
+
+context:
+  name: mira-omf
+  version: 3.3.0b2
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
   path: ../omf
 
 build:
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   host:
@@ -37,3 +40,4 @@ extra:
   recipe-maintainers:
     - SophieCurinier
     - sebhmg
+
