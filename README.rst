@@ -18,7 +18,7 @@ omf
     :alt: pytest
 
 
-Version: 3.3.0-beta.2
+Version: 3.4.0-alpha.1
 
 API library for Open Mining Format, a new standard for mining data backed by
 the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
@@ -89,7 +89,8 @@ License
 ^^^^^^^
 MIT License
 
-Copyright (c) 2024 Mira Geoscience
+Copyright (c) 2017 Global Mining Standards and Guidelines Group
+Copyright (c) 2022-2025 Mira Geoscience
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
