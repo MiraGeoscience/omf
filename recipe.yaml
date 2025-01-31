@@ -1,0 +1,47 @@
+schema_version: 1
+
+context:
+  name: mira-omf
+  version: 3.4.0a1
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  path: ../omf
+
+build:
+  number: 0
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python >=3.10.0,<4.0.0
+    - poetry-core >=1.0.0
+    - setuptools
+    - pip
+  run:
+    - python >=3.9.0,<3.11
+    - numpy >=1.26.0,<1.27.0
+    - properties >=0.6
+    - pypng 0.20220715.*
+    - six >=1.16.0
+    - vectormath >=0.2.0
+    - geoh5py >=0.10.0b1,<0.11.0a.dev
+
+about:
+  summary: API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
+  description: |
+     API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
+  license: MIT
+  license_file:
+    - LICENSE
+  homepage: https://www.mirageoscience.com/mining-industry-software/python-integration/
+  repository: https://github.com/MiraGeoscience/omf
+
+extra:
+  recipe-maintainers:
+    - SophieCurinier
+    - sebhmg
