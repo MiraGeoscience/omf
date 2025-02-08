@@ -1,10 +1,19 @@
 """serializers.py: array and image serializers/deserializers for OMF file IO"""
 
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2017 Global Mining Standards and Guidelines Group             '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 import zlib
 from io import BytesIO
 
 import numpy as np
-from six import PY2
 
 
 def array_serializer(arr, open_file, **kwargs):  # pylint: disable=unused-argument

@@ -1,3 +1,13 @@
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -6,6 +16,7 @@ import pytest
 
 import omf
 from omf.scripts import geoh5_to_omf
+
 
 # pylint: disable=duplicate-code
 

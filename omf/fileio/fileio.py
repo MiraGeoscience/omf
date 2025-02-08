@@ -1,5 +1,15 @@
 """fileio.py: OMF Writer and Reader for serializing to and from .omf files"""
 
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2017 Global Mining Standards and Guidelines Group             '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 from __future__ import annotations
 
 import json
@@ -8,6 +18,7 @@ import uuid
 
 from omf.base import UidModel
 from omf.fileio.geoh5 import GeoH5Writer
+
 
 __version__ = b"OMF-v0.9.0"
 

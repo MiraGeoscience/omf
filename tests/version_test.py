@@ -1,16 +1,29 @@
 """Test the version follows SemVer and is consistent across files."""
 
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 from __future__ import annotations
 
 import re
 from pathlib import Path
 
 import tomli as toml
+import yaml
+from jinja2 import Template
+from packaging.version import Version
 
 import omf
 
 
-def get_version():
+def get_pyproject_version():
     path = Path(__file__).resolve().parents[1] / "pyproject.toml"
 
     with open(str(path), encoding="utf-8") as file:
@@ -19,20 +32,25 @@ def get_version():
     return pyproject["tool"]["poetry"]["version"]
 
 
-def get_version_in_readme() -> str | None:
-    path = Path(__file__).resolve().parents[1] / "README.rst"
+def get_conda_recipe_version():
+    path = Path(__file__).resolve().parents[1] / "meta.yaml"
 
-    version_re = r"^\s*Version:\s*(\S*)\s*$"
     with open(str(path), encoding="utf-8") as file:
-        for line in file:
-            match = re.match(version_re, line)
-            if match:
-                return match[1]
-    return None
+        content = file.read()
+
+    template = Template(content)
+    rendered_yaml = template.render()
+
+    recipe = yaml.safe_load(rendered_yaml)
+
+    return recipe["package"]["version"]
 
 
 def test_version_is_consistent():
-    assert omf.__version__ == get_version()
+    assert omf.__version__ == get_pyproject_version()
+    normalized_conda_version = Version(get_conda_recipe_version())
+    normalized_version = Version(omf.__version__)
+    assert normalized_conda_version == normalized_version
 
 
 def version_base_and_pre() -> tuple[str, str]:
@@ -44,16 +62,6 @@ def version_base_and_pre() -> tuple[str, str]:
     match = re.match(version_re, omf.__version__)
     assert match is not None
     return match[1], match[2]
-
-
-def test_version_in_readme():
-    version_base, prerelease = version_base_and_pre()
-    version_readme = get_version_in_readme()
-    assert version_readme is not None
-    if prerelease is not None and prerelease.startswith("-rc."):
-        assert version_readme in [omf.__version__, version_base]
-    else:
-        assert version_readme == omf.__version__
 
 
 def test_version_is_semver():

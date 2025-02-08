@@ -1,3 +1,13 @@
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 import argparse
 import logging
 import sys
@@ -5,6 +15,7 @@ from pathlib import Path
 
 from omf.fileio import OMFReader
 from omf.fileio.geoh5 import GeoH5Writer
+
 
 _logger = logging.getLogger(__package__ + "." + Path(__file__).stem)
 

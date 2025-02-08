@@ -1,3 +1,13 @@
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2022-2025 Mira Geoscience Ltd.                                '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 # pylint: disable=too-many-lines
 
 from __future__ import annotations
@@ -34,6 +44,7 @@ from omf.pointset import PointSetElement, PointSetGeometry
 from omf.surface import SurfaceElement, SurfaceGeometry, SurfaceGridGeometry
 from omf.volume import VolumeElement, VolumeGridGeometry
 
+
 _logger = logging.getLogger(__package__)
 
 
@@ -67,7 +78,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
         file_name: str | Path,
         compression: int = 5,
     ):
-        if not isinstance(file_name, (str, Path)):
+        if not isinstance(file_name, str | Path):
             raise TypeError("Input 'file' must be of str or Path.")
 
         self.file = file_name
@@ -154,9 +165,6 @@ class BaseConversion(ABC):
         "uid": "uid",
         "name": "name",
     }
-    _geoh5 = None
-    _parent = None
-    _mapping = None
 
     def __init__(
         self,
@@ -168,7 +176,9 @@ class BaseConversion(ABC):
         if element is None:
             raise ValueError("Input 'element' cannot be None.")
 
+        self._geoh5 = None
         self.geoh5 = geoh5
+
         self.compression = compression
         self._parent = parent
 
@@ -425,7 +435,10 @@ class ElementConversion(BaseConversion):
                 element._backend.update({"uid": uid})  # pylint: disable=W0212
 
             element.data = self.process_dependents(
-                entity, element, workspace, self.compression  # type: ignore
+                entity,
+                element,
+                workspace,
+                self.compression,  # type: ignore
             )
 
         return element
@@ -478,9 +491,12 @@ class ProjectConversion(BaseConversion):
             kwargs = self.collect_attributes(entity, workspace, **kwargs)
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
-            getattr(project, "_backend").update({"uid": uid})  # pylint: disable=W0212
+            project._backend.update({"uid": uid})  # pylint: disable=W0212
             project.elements = self.process_dependents(
-                entity, project, workspace, self.compression  # type: ignore
+                entity,
+                project,
+                workspace,
+                self.compression,  # type: ignore
             )
 
         return project
@@ -679,7 +695,10 @@ class ReferenceMapConversion(ArrayConversion):
         element: ReferencedData, workspace: str | Workspace | Path, **kwargs
     ) -> dict:
         with fetch_h5_handle(workspace):
-            labels = list(element.value_map.map.values())
+            if element.value_map is None:
+                return kwargs
+
+            labels = list(element.value_map().values())
             ind = 0
             if "Unknown" in labels:
                 ind = 1
@@ -976,8 +995,9 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
         with fetch_h5_handle(workspace):
             geometry = {}
             for key, alias in cls._attribute_map.items():
-                cell_size, count = getattr(entity, f"{alias}_cell_size"), getattr(
-                    entity, f"{alias}_count"
+                cell_size, count = (
+                    getattr(entity, f"{alias}_cell_size"),
+                    getattr(entity, f"{alias}_count"),
                 )
                 tensor = np.ones(count) * np.abs(cell_size)
                 geometry.update({f"tensor_{key}": tensor})

@@ -1,6 +1,17 @@
 """Tests for PointSet validation"""
 
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#                                                                              '
+#  This file is part of mira-omf package.                                      '
+#                                                                              '
+#  mira-omf is distributed under the terms and conditions of the MIT License   '
+#  (see LICENSE file at the root of this source code package).                 '
+#                                                                              '
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 import logging
+from pathlib import Path
 
 import numpy as np
 from geoh5py.workspace import Workspace
@@ -8,7 +19,7 @@ from geoh5py.workspace import Workspace
 import omf
 
 
-def test_grid2d_to_geoh5(tmp_path, caplog):
+def test_grid2d_to_geoh5(tmp_path: Path, caplog):
     """Test pointset geometry validation"""
 
     dip = np.random.uniform(low=0.0, high=90, size=1)
