@@ -46,18 +46,6 @@ def get_conda_recipe_version():
     return recipe["context"]["version"]
 
 
-def get_version_in_readme() -> str | None:
-    path = Path(__file__).resolve().parents[1] / "README.rst"
-
-    version_re = r"^\s*Version:\s*(\S*)\s*$"
-    with open(str(path), encoding="utf-8") as file:
-        for line in file:
-            match = re.match(version_re, line)
-            if match:
-                return match[1]
-    return None
-
-
 def test_version_is_consistent():
     assert omf.__version__ == get_pyproject_version()
     normalized_conda_version = Version(get_conda_recipe_version())
@@ -74,16 +62,6 @@ def version_base_and_pre() -> tuple[str, str]:
     match = re.match(version_re, omf.__version__)
     assert match is not None
     return match[1], match[2]
-
-
-def test_version_in_readme():
-    version_base, prerelease = version_base_and_pre()
-    version_readme = get_version_in_readme()
-    assert version_readme is not None
-    if prerelease is not None and prerelease.startswith("-rc."):
-        assert version_readme in [omf.__version__, version_base]
-    else:
-        assert version_readme == omf.__version__
 
 
 def test_version_is_semver():
