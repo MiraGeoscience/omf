@@ -34,6 +34,19 @@ requirements:
     - six >=1.16.0, <2.0.dev
     - vectormath 0.2.*
 
+tests:
+  - python:
+      imports:
+        - omf
+  - script:
+      - pytest ./tests
+    requirements:
+      run:
+        - pytest
+    files:
+      source:
+        - tests/
+
 about:
   summary: API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
   description: |
