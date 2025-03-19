@@ -49,6 +49,7 @@ tests:
     files:
       source:
         - tests/
+        - docs/images/PointSetGeometry.png
 
 about:
   summary: API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
