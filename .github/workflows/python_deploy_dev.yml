@@ -12,11 +12,12 @@ concurrency:
 jobs:
   call-workflow-conda-publish:
     name: Publish development conda package on JFrog Artifactory
-    uses: MiraGeoscience/CI-tools/.github/workflows/reusable-python-publish_rattler_package.yml@main
+    uses: MiraGeoscience/CI-tools/.github/workflows/reusable-python-publish_rattler_package.yml@DEVOPS-678
     with:
       package-name: 'mira-omf'
       python-version: '3.10'
-      source-repo-names: '["public-conda-dev-local", "conda-forge-dev-remote"]'
+      source-repo-names: '["public-noremote-conda-dev"]'
+      conda-channels: '["conda-forge"]'
       publish-repo-names: '["public-conda-dev"]'
     secrets:
       JFROG_ARTIFACTORY_URL: ${{ secrets.JFROG_ARTIFACTORY_URL }}
