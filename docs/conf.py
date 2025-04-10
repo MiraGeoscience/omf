@@ -66,7 +66,7 @@ author = u'Global Mining Standards and Guidelines Group'
 # built documents.
 
 # The full version.
-release = version("omf")
+release = version("mira-omf")
 # The base X.Y.Z version.
 version = Version(release).base_version
 
