@@ -14,8 +14,9 @@
 
 import sys
 import os
-from importlib.metadata import version
+from importlib import metadata
 from packaging.version import Version
+from pathlib import Path
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -66,7 +67,8 @@ author = u'Global Mining Standards and Guidelines Group'
 # built documents.
 
 # The full version.
-release = version("omf")
+dist = metadata.PathDistribution(Path(__file__).parent / '_build')
+release = dist.version("omf")
 # The base X.Y.Z version.
 version = Version(release).base_version
 

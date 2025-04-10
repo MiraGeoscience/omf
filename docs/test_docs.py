@@ -1,7 +1,7 @@
 import os
 import subprocess
 import unittest
-
+from pathlib import Path
 
 class TestDoc(unittest.TestCase):
     @property
@@ -10,6 +10,8 @@ class TestDoc(unittest.TestCase):
         return os.path.sep.join(dirname.split(os.path.sep)[:-1] + ["docs"])
 
     def setUp(self):
+        self.src_root = Path(__file__).resolve().parents[1]
+
         self.build_dir = os.path.sep.join(self.docs_dir.split(os.path.sep) + ["_build"])
         if not os.path.isdir(self.build_dir):
             os.makedirs(f"{self.build_dir}")
@@ -23,6 +25,19 @@ class TestDoc(unittest.TestCase):
         self.html_dir = os.path.sep.join(self.build_dir.split(os.path.sep) + ["html"])
         if not os.path.isdir(self.html_dir):
             os.makedirs(f"{self.html_dir}")
+
+        check = subprocess.call(
+            [
+                "pip",
+                "install",
+                "--no-deps",
+                f"{self.src_root}",
+                "--root",
+                f"{self.build_dir}",
+            ]
+        )
+        assert check == 0
+
 
     def test_html(self):
         check = subprocess.call(
