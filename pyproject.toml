@@ -56,7 +56,7 @@ vectormath = "0.2.*"
 ## dependencies from Git repositories
 #------------------------------------
 #geoh5py = {version = ">=0.11.0a1, <0.12.dev", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "release/0.11.0-a.3"}
+geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "release/0.11.0"}
 #geoh5py = {path = "../geoh5py", develop = true}
 
 [tool.poetry.group.dev.dependencies]
