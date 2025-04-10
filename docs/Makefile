@@ -54,42 +54,42 @@ clean:
 
 .PHONY: html
 html:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 .PHONY: dirhtml
 dirhtml:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
 
 .PHONY: singlehtml
 singlehtml:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
 
 .PHONY: pickle
 pickle:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b pickle $(ALLSPHINXOPTS) $(BUILDDIR)/pickle
 	@echo
 	@echo "Build finished; now you can process the pickle files."
 
 .PHONY: json
 json:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b json $(ALLSPHINXOPTS) $(BUILDDIR)/json
 	@echo
 	@echo "Build finished; now you can process the JSON files."
 
 .PHONY: htmlhelp
 htmlhelp:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b htmlhelp $(ALLSPHINXOPTS) $(BUILDDIR)/htmlhelp
 	@echo
 	@echo "Build finished; now you can run HTML Help Workshop with the" \
@@ -97,7 +97,7 @@ htmlhelp:
 
 .PHONY: qthelp
 qthelp:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b qthelp $(ALLSPHINXOPTS) $(BUILDDIR)/qthelp
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
@@ -108,7 +108,7 @@ qthelp:
 
 .PHONY: applehelp
 applehelp:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b applehelp $(ALLSPHINXOPTS) $(BUILDDIR)/applehelp
 	@echo
 	@echo "Build finished. The help book is in $(BUILDDIR)/applehelp."
@@ -118,7 +118,7 @@ applehelp:
 
 .PHONY: devhelp
 devhelp:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
@@ -129,14 +129,14 @@ devhelp:
 
 .PHONY: epub
 epub:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b epub $(ALLSPHINXOPTS) $(BUILDDIR)/epub
 	@echo
 	@echo "Build finished. The epub file is in $(BUILDDIR)/epub."
 
 .PHONY: latex
 latex:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
@@ -145,7 +145,7 @@ latex:
 
 .PHONY: latexpdf
 latexpdf:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
@@ -153,7 +153,7 @@ latexpdf:
 
 .PHONY: latexpdfja
 latexpdfja:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through platex and dvipdfmx..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf-ja
@@ -161,21 +161,21 @@ latexpdfja:
 
 .PHONY: text
 text:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
 	@echo
 	@echo "Build finished. The text files are in $(BUILDDIR)/text."
 
 .PHONY: man
 man:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
 	@echo
 	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
 
 .PHONY: texinfo
 texinfo:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo
 	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo."
@@ -184,7 +184,7 @@ texinfo:
 
 .PHONY: info
 info:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo "Running Texinfo files through makeinfo..."
 	make -C $(BUILDDIR)/texinfo info
@@ -192,7 +192,7 @@ info:
 
 .PHONY: gettext
 gettext:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b gettext $(I18NSPHINXOPTS) $(BUILDDIR)/locale
 	@echo
 	@echo "Build finished. The message catalogs are in $(BUILDDIR)/locale."
@@ -224,14 +224,14 @@ coverage:
 
 .PHONY: xml
 xml:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b xml $(ALLSPHINXOPTS) $(BUILDDIR)/xml
 	@echo
 	@echo "Build finished. The XML files are in $(BUILDDIR)/xml."
 
 .PHONY: pseudoxml
 pseudoxml:
-    $(PIP) install .. --no-deps --root $(BUILDDIR)
+    $(PIP) install .. --no-deps
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."

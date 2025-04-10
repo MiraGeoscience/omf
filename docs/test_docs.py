@@ -30,10 +30,8 @@ class TestDoc(unittest.TestCase):
             [
                 "pip",
                 "install",
-                "--no-deps",
                 f"{self.src_root}",
-                "--root",
-                f"{self.build_dir}",
+                "--no-deps",
             ]
         )
         assert check == 0
