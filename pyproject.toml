@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mira-omf"
-version = "3.3.1-alpha.2"
+version = "3.4.0-alpha.1"
 description = "API Library for Open Mining Format"
 license = "MIT"
 authors = [
@@ -55,8 +55,8 @@ vectormath = "0.2.*"
 
 ## dependencies from Git repositories
 #------------------------------------
-#geoh5py = {version = ">=0.11.0a3, <0.12.dev", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "release/0.11.0"}
+#geoh5py = {version = ">=0.12.0a1, <0.13.dev", allow-prereleases = true}
+geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
 #geoh5py = {path = "../geoh5py", develop = true}
 
 [tool.poetry.group.dev.dependencies]
