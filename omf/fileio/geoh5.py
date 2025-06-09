@@ -563,7 +563,7 @@ class ArrayConversion(BaseConversion):
                 values = getattr(element, "values", None)
 
                 if np.issubdtype(values.dtype, np.floating):
-                    values[np.isnan(values)] = FLOAT_NDV
+                    values[np.isnan(values)] = np.nan
                 else:
                     values[np.isclose(values, INTEGER_NDV)] = 0
 
