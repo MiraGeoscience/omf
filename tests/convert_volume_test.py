@@ -17,6 +17,7 @@ from geoh5py.objects import BlockModel
 from geoh5py.workspace import Workspace
 
 import omf
+from omf import Project
 from omf.fileio.geoh5 import block_model_reordering
 
 
@@ -83,7 +84,7 @@ def test_volume_to_geoh5(tmp_path: Path):
         ],
     )
 
-    file = str(tmp_path / "block_model.geoh5")
+    file = str(tmp_path / f"{__name__}.geoh5")
     omf.OMFWriter(vol, file)
 
     with Workspace(file) as workspace:
@@ -126,7 +127,7 @@ def test_volume_flip_origin_z(tmp_path):
         ),
     )
 
-    file = str(tmp_path / "block_model.geoh5")
+    file = str(tmp_path / f"{__name__}.geoh5")
     omf.OMFWriter(vol, file)
 
     with Workspace(file) as workspace:
@@ -152,10 +153,51 @@ def test_volume_flip_origin_z(tmp_path):
         converter = omf.fileio.geoh5.get_conversion_map(block, workspace)
         converted_omf = converter.from_geoh5(block)
 
-        with Workspace(str(tmp_path / "block_model_converted.geoh5")) as out_ws:
+        with Workspace(str(tmp_path / f"{__name__}_converted.geoh5")) as out_ws:
             converter = omf.fileio.geoh5.get_conversion_map(converted_omf, out_ws)
             converted_geoh5 = converter.from_omf(converted_omf)
 
             np.testing.assert_array_almost_equal(
                 block.centroids, converted_geoh5.centroids
             )
+
+
+def test_nan_values(tmp_path):
+    file = str(tmp_path / f"{__name__}.geoh5")
+
+    with Workspace(file) as workspace:
+        block = BlockModel.create(
+            workspace,
+            origin=[0, 0, 0],
+            u_cell_delimiters=np.arange(0, 11) * 2.5,
+            v_cell_delimiters=np.arange(0, 22) * 3.6,
+            z_cell_delimiters=np.arange(0, 33) * 4.7,
+        )
+
+        values = np.random.randn(block.n_cells)
+        values[block.centroids[:, 2] > 100] = np.nan  # Set some values to NaN
+
+        block.add_data(
+            {
+                "test_data": {
+                    "values": values,
+                }
+            }
+        )
+
+        converter = omf.fileio.geoh5.get_conversion_map(block, workspace)
+        converted_omf = converter.from_geoh5(block)
+
+        project = Project(name="Test Project", elements=[converted_omf])
+        omf.OMFWriter(project, str(tmp_path / "converted.omf"))
+
+        # Read it back in
+        reader = omf.OMFReader(str(str(tmp_path / "converted.omf")))
+
+        project = reader.get_project()
+
+        with Workspace(str(tmp_path / f"{__name__}_return_trip.geoh5")) as out_ws:
+            converter = omf.fileio.geoh5.get_conversion_map(project, out_ws)
+            converter.from_omf(project)
+            rec_data = out_ws.get_entity("test_data")[0]
+            assert np.isnan(rec_data.values).sum() == np.isnan(values).sum()
