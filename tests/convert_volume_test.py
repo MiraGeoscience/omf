@@ -16,7 +16,6 @@ import numpy as np
 from geoh5py.objects import BlockModel
 from geoh5py.shared import INTEGER_NDV
 from geoh5py.workspace import Workspace
-from pydantic_core.core_schema import int_schema
 
 import omf
 from omf import Project
