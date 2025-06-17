@@ -14,7 +14,9 @@ from pathlib import Path
 
 import numpy as np
 from geoh5py.objects import BlockModel
+from geoh5py.shared import INTEGER_NDV
 from geoh5py.workspace import Workspace
+from pydantic_core.core_schema import int_schema
 
 import omf
 from omf import Project
@@ -177,11 +179,16 @@ def test_nan_values(tmp_path):
         values = np.random.randn(block.n_cells)
         values[block.centroids[:, 2] > 100] = np.nan  # Set some values to NaN
 
+        int_values = np.random.randint(0, 10, block.n_cells)
+        int_values[block.centroids[:, 2] > 100] = INTEGER_NDV  # Set some values to NaN
         block.add_data(
             {
                 "test_data": {
                     "values": values,
-                }
+                },
+                "test_int_data": {
+                    "values": int_values,
+                },
             }
         )
 
