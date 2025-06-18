@@ -13,6 +13,7 @@
 from pathlib import Path
 
 import numpy as np
+from geoh5py.data import IntegerData
 from geoh5py.objects import BlockModel
 from geoh5py.shared import INTEGER_NDV
 from geoh5py.workspace import Workspace
@@ -207,3 +208,9 @@ def test_nan_values(tmp_path):
             converter.from_omf(project)
             rec_data = out_ws.get_entity("test_data")[0]
             assert np.isnan(rec_data.values).sum() == np.isnan(values).sum()
+
+            rec_data = out_ws.get_entity("test_int_data")[0]
+            assert isinstance(rec_data, IntegerData)
+            assert (rec_data.values == INTEGER_NDV).sum() == (
+                block.centroids[:, 2] > 100
+            ).sum()
