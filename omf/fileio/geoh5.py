@@ -555,7 +555,7 @@ class ArrayConversion(BaseConversion):
                 ndvs = np.isnan(values)
 
                 if np.allclose(
-                    values[~ndvs].astype(np.int32), values[~ndvs], atol=1e-45
+                    values[~ndvs].astype(np.int32), values[~ndvs], atol=2e-45
                 ):
                     values[ndvs] = INTEGER_NDV
                     values = values.astype(np.int32)
@@ -566,7 +566,7 @@ class ArrayConversion(BaseConversion):
                 values = getattr(element, "values", None)
 
                 if np.issubdtype(values.dtype, np.floating):
-                    values[np.isclose(values, FLOAT_NDV, atol=1e-45)] = np.nan
+                    values[np.isclose(values, FLOAT_NDV, atol=2e-45)] = np.nan
                 else:
                     # Convert to float with nan as no-data value not supporter by OMF
                     ndvs = np.isclose(values, INTEGER_NDV)
