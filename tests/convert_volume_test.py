@@ -13,7 +13,9 @@
 from pathlib import Path
 
 import numpy as np
+from geoh5py.data import IntegerData
 from geoh5py.objects import BlockModel
+from geoh5py.shared import INTEGER_NDV
 from geoh5py.workspace import Workspace
 
 import omf
@@ -177,11 +179,16 @@ def test_nan_values(tmp_path):
         values = np.random.randn(block.n_cells)
         values[block.centroids[:, 2] > 100] = np.nan  # Set some values to NaN
 
+        int_values = np.random.randint(0, 10, block.n_cells)
+        int_values[block.centroids[:, 2] > 100] = INTEGER_NDV  # Set some values to NaN
         block.add_data(
             {
                 "test_data": {
                     "values": values,
-                }
+                },
+                "test_int_data": {
+                    "values": int_values,
+                },
             }
         )
 
@@ -201,3 +208,9 @@ def test_nan_values(tmp_path):
             converter.from_omf(project)
             rec_data = out_ws.get_entity("test_data")[0]
             assert np.isnan(rec_data.values).sum() == np.isnan(values).sum()
+
+            rec_data = out_ws.get_entity("test_int_data")[0]
+            assert isinstance(rec_data, IntegerData)
+            assert (rec_data.values == INTEGER_NDV).sum() == (
+                block.centroids[:, 2] > 100
+            ).sum()
