@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: "mira-omf"
-  version: "3.3.1a2"
+  version: "3.3.1"
   python_min: "3.10"
 
 package:
