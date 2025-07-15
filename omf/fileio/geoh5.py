@@ -21,13 +21,20 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from geoh5py.data import Data, FloatData, IntegerData, ReferencedData
-from geoh5py.groups import PropertyGroup, RootGroup
+from geoh5py.data import (
+    Data,
+    DataTypeEnum,
+    FloatData,
+    IntegerData,
+    NumericData,
+    ReferencedData,
+)
+from geoh5py.groups import ContainerGroup, PropertyGroup, RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
 from geoh5py.shared import FLOAT_NDV, INTEGER_NDV, Entity
 from geoh5py.workspace import Workspace
 
-from omf.base import Project, UidModel
+from omf.base import ContentModel, Project, UidModel
 from omf.data import (
     ColorArray,
     Int2Array,
@@ -203,7 +210,7 @@ class BaseConversion(ABC):
     @staticmethod
     def process_dependents(
         element: UidModel | Entity,
-        parent: Entity,
+        parent: Entity | None,
         workspace: str | Path | Workspace,
         compression: int,
     ) -> list:
@@ -238,7 +245,11 @@ class BaseConversion(ABC):
                 converter = get_conversion_map(
                     child, workspace, compression=compression, parent=element
                 )
-                children += [getattr(converter, method)(child, **kwargs)]
+                converted = getattr(converter, method)(child, **kwargs)
+                if isinstance(converted, list):
+                    children += converted
+                else:
+                    children.append(converted)
 
                 if len(children_list) > 1:
                     _logger.info(
@@ -368,6 +379,51 @@ class DataConversion(BaseConversion):
         return element
 
 
+class ContainerGroupConversion(BaseConversion):
+    """
+    Forward only conversion from :obj:`geoh5py.groups.ContainerGroup` to a flatten
+    OMF project.
+
+    :param obj: Either an omf or geoh5 class.
+    :param geoh5: Path to a geoh5 or active :obj:`geoh5py.workspace.Workspace`.
+    :param compression: Compression level for data.
+    """
+
+    _attribute_map: dict[str, Any] = {
+        "name": "name",
+        "uid": "uid",
+    }
+
+    def __init__(
+        self,
+        obj: UidModel | Entity,
+        geoh5: str | Path | Workspace,
+        compression: int,
+        **kwargs,
+    ):
+        super().__init__(obj, geoh5, compression, **kwargs)
+
+    def from_omf(self, element: ContentModel, **kwargs) -> Entity | None:  # type: ignore
+        pass
+
+    def from_geoh5(self, entity: ObjectBase, **kwargs) -> UidModel:  # type: ignore
+        """
+        Convert :obj:`geoh5.objects` object to :obj:`omf.base.Element` class.
+
+        :param entity: Input :obj:`geoh5.objects` class.
+        :param kwargs: Input dictionary of attributes to be appended.
+
+        :returns: An OMF Element.
+        """
+        with fetch_h5_handle(self.geoh5) as workspace:
+            return self.process_dependents(
+                entity,
+                None,
+                workspace,
+                self.compression,  # type: ignore
+            )
+
+
 class ElementConversion(BaseConversion):
     """
     Conversion between :obj:`omf.pointset.PointSetElement` and
@@ -492,12 +548,13 @@ class ProjectConversion(BaseConversion):
             uid = kwargs.pop("uid")
             project = self.omf_type(**kwargs)
             project._backend.update({"uid": uid})  # pylint: disable=W0212
-            project.elements = self.process_dependents(
+            elements = self.process_dependents(
                 entity,
                 project,
                 workspace,
                 self.compression,  # type: ignore
             )
+            project.elements = elements
 
         return project
 
@@ -565,6 +622,11 @@ class ArrayConversion(BaseConversion):
             else:
                 values = getattr(element, "values", None)
 
+                if values is None and isinstance(element, NumericData):
+                    dtype = DataTypeEnum[element.entity_type.primitive_type.name].value
+                    values = np.ones(element.n_values, dtype=dtype) * element.ndv
+
+            if values is not None:
                 if np.issubdtype(values.dtype, np.floating):
                     values[np.isclose(values, FLOAT_NDV, atol=2e-45)] = np.nan
                 else:
@@ -574,7 +636,6 @@ class ArrayConversion(BaseConversion):
                         values = values.astype(np.float32)
                         values[ndvs] = np.nan
 
-            if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
                 if conversion is not None:
                     values = conversion(self._parent, values)
@@ -612,9 +673,12 @@ class IndicesConversion(ArrayConversion):
                 values = element.array.array
             else:
                 values = getattr(element, "values", None)
-                values[np.isclose(values, INTEGER_NDV)] = 0
+
+                if values is None and isinstance(element, NumericData):
+                    values = np.ones(element.n_values, dtype=np.int32) * INTEGER_NDV
 
             if values is not None:
+                values[np.isclose(values, INTEGER_NDV)] = 0
                 conversion = _VALUE_MAP.get(type(self._parent), None)
                 if conversion is not None:
                     values = conversion(self._parent, values)
@@ -706,6 +770,10 @@ class ReferenceMapConversion(ArrayConversion):
                 return kwargs
 
             labels = list(element.value_map().values())
+
+            if isinstance(labels[0], bytes):
+                labels = [label.decode("utf-8") for label in labels]
+
             ind = 0
             if "Unknown" in labels:
                 ind = 1
@@ -1304,6 +1372,7 @@ _CLASS_MAP = {
 
 _CONVERSION_MAP: dict = {
     BlockModel: VolumeConversion,
+    ContainerGroup: ContainerGroupConversion,
     Curve: CurveConversion,
     FloatData: ScalarDataConversion,
     Grid2D: SurfaceGridConversion,
