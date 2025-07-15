@@ -626,7 +626,6 @@ class ArrayConversion(BaseConversion):
                     dtype = DataTypeEnum[element.entity_type.primitive_type.name].value
                     values = np.ones(element.n_values, dtype=dtype) * element.ndv
 
-            if values is not None:
                 if np.issubdtype(values.dtype, np.floating):
                     values[np.isclose(values, FLOAT_NDV, atol=2e-45)] = np.nan
                 else:
@@ -636,6 +635,7 @@ class ArrayConversion(BaseConversion):
                         values = values.astype(np.float32)
                         values[ndvs] = np.nan
 
+            if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
                 if conversion is not None:
                     values = conversion(self._parent, values)
@@ -677,8 +677,9 @@ class IndicesConversion(ArrayConversion):
                 if values is None and isinstance(element, NumericData):
                     values = np.ones(element.n_values, dtype=np.int32) * INTEGER_NDV
 
-            if values is not None:
                 values[np.isclose(values, INTEGER_NDV)] = 0
+
+            if values is not None:
                 conversion = _VALUE_MAP.get(type(self._parent), None)
                 if conversion is not None:
                     values = conversion(self._parent, values)
