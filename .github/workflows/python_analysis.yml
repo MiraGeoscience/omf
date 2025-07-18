@@ -1,4 +1,4 @@
-name: Python analysis
+name: Python analysis 
 
 on:
   pull_request:
@@ -29,6 +29,8 @@ jobs:
       package-manager: 'poetry'
       app-name: 'omf'
       python-version: '3.10'
+      working-directory: 'omf'
+
   call-workflow-pytest:
     name: Pytest
     uses: MiraGeoscience/CI-tools/.github/workflows/reusable-python-pytest.yml@main
@@ -39,5 +41,6 @@ jobs:
       cache-number: 1
       codecov-reference-python-version: '3.10'
       codecov-reference-os: '["windows-latest"]'
+      working-directory: 'omf'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
