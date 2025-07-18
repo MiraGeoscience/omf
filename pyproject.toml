@@ -50,24 +50,15 @@ include = [
     { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
 
-[project.scripts]
-geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
-omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 
-[tool.poetry.dependencies]
-python = "^3.10"
-
-numpy = "~1.26.0"  # also in geoh5py
-properties = "0.6.*"
-pypng = "^0.20220715"
-six = "^1.16"
-vectormath = "0.2.*"
-
-## dependencies from Git repositories
-#------------------------------------
-#geoh5py = {version = ">=0.12.0a1, <0.13.dev", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-#geoh5py = {path = "../geoh5py", develop = true}
+dependencies = [
+  "numpy ~= 1.26.0",
+  "properties == 0.6.*",
+  "pypng >= 0.20220715",
+  "six >= 1.16",
+  "vectormath == 0.2.*",
+  "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@develop"
+]
 
 [tool.poetry.group.dev.dependencies]
 Pygments = "*"
