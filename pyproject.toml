@@ -1,23 +1,23 @@
 [build-system]
-requires = ["poetry-core>=1.8.0"]
+requires = ["poetry-core>=1.0.0", "setuptools"]
 build-backend = "poetry.core.masonry.api"
+
 
 [project]
 name = "mira-omf"
 version = "3.4.0-alpha.1"
-
 dynamic = ["dependencies"]
-
-requires-python = ">=3.10,<4.0"
-
+requires-python = ">=3.10"
 description = "API Library for Open Mining Format"
 license = "MIT"
 authors = [
-    { name = "Mira Geoscience", email = "support@mirageoscience.com" },
-    { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
+  { name = "Mira Geoscience", email = "support@mirageoscience.com" },
+  { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
 ]
-maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
-
+maintainers = [ { name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
+repository = "https://github.com/MiraGeoscience/omf"
+#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
+homepage = "https://www.mirageoscience.com/mining-industry-software/python-integration/"
 
 readme = "README.rst"
 keywords = ["geology", "geophysics", "earth sciences"]
@@ -46,12 +46,6 @@ include = [
     { path = "THIRD_PARTY_SOFTWARE.rst" },
     { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
-
-
-[project.urls]
-repository = "https://github.com/MiraGeoscience/omf"
-#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
-homepage = "https://www.mirageoscience.com/mining-industry-software/python-integration/"
 
 [project.scripts]
 geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
