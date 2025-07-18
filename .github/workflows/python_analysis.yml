@@ -27,7 +27,7 @@ jobs:
     uses: MiraGeoscience/CI-tools/.github/workflows/reusable-python-static_analysis.yml@DEVOPS-690-poetry2
     with:
       package-manager: 'poetry'
-      app-name: 'omf'
+      app-name: '.'
       python-version: '3.10'
   call-workflow-pytest:
     name: Pytest
