@@ -48,10 +48,8 @@ geoh5py = [
   "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@develop"
 ]
 
-[tool.poetry]
-packages = [
-    { include = "omf" },
-]
+[tool.setuptools.packages.find]
+where = ["omf"]
 
 include = [
     { path = "COPYING" },
