@@ -18,7 +18,7 @@ from geoh5py.workspace import Workspace
 import omf
 
 
-def test_pointset_to_geoh5(tmp_path: Path):
+def test_pointset_to_geoh5(tmp_path: Path, caplog):
     """Test pointset geometry validation"""
     colormap = omf.ColorArray(
         array=[
@@ -49,18 +49,24 @@ def test_pointset_to_geoh5(tmp_path: Path):
     file = str(tmp_path / "pointset.geoh5")
     omf.OMFWriter(orig_pts, file)
 
+    # Check that the file was created
     with Workspace(file) as workspace:
         geoh5_points = workspace.get_entity("Random Points")[0]
         np.testing.assert_array_almost_equal(
             np.r_[orig_pts.geometry.vertices.array], geoh5_points.vertices
         )
 
+        geoh5_points.add_default_visual_parameters()
         data = geoh5_points.get_entity("rand data")[0]
         np.testing.assert_array_almost_equal(np.r_[orig_pts.data[0].array], data.values)
 
         converter = omf.fileio.geoh5.get_conversion_map(geoh5_points, workspace)
-        converted_omf = converter.from_geoh5(geoh5_points)
 
+        with caplog.at_level("WARNING"):
+            converted_omf = converter.from_geoh5(geoh5_points)
+
+        assert len(caplog.text) == 0, "No warnings should be raised during conversion"
+        assert len(converted_omf.data) == 1  # Skip the visual parameters
     omf.fileio.utils.compare_elements(converted_omf, orig_pts)
 
     project = omf.fileio.geoh5.GeoH5Reader(file).project

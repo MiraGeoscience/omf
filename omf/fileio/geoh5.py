@@ -25,9 +25,11 @@ from geoh5py.data import (
     Data,
     DataTypeEnum,
     FloatData,
+    GeometricDataConstants,
     IntegerData,
     NumericData,
     ReferencedData,
+    VisualParameters,
 )
 from geoh5py.groups import ContainerGroup, PropertyGroup, RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
@@ -245,7 +247,11 @@ class BaseConversion(ABC):
                 converter = get_conversion_map(
                     child, workspace, compression=compression, parent=element
                 )
+                if isinstance(converter, KnownUnsupported):
+                    continue
+
                 converted = getattr(converter, method)(child, **kwargs)
+
                 if isinstance(converted, list):
                     children += converted
                 else:
@@ -303,6 +309,18 @@ class BaseConversion(ABC):
                     kwargs[label] = prop
 
         return kwargs
+
+
+class KnownUnsupported(BaseConversion):
+    """
+    Conversion class that silently ignores unsupported conversions.
+    """
+
+    def from_omf(self, *_, **kwargs) -> dict:
+        return {}
+
+    def from_geoh5(self, *_, **kwargs) -> dict:
+        return {}
 
 
 class DataConversion(BaseConversion):
@@ -1376,6 +1394,7 @@ _CONVERSION_MAP: dict = {
     ContainerGroup: ContainerGroupConversion,
     Curve: CurveConversion,
     FloatData: ScalarDataConversion,
+    GeometricDataConstants: KnownUnsupported,
     Grid2D: SurfaceGridConversion,
     Int2Array: ArrayConversion,
     IntegerData: ScalarDataConversion,
@@ -1392,6 +1411,7 @@ _CONVERSION_MAP: dict = {
     Surface: SurfaceConversion,
     SurfaceElement: SurfaceConversion,
     Vector3Array: ArrayConversion,
+    VisualParameters: KnownUnsupported,
     VolumeElement: VolumeConversion,
 }
 
