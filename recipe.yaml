@@ -1,0 +1,71 @@
+schema_version: 1
+
+context:
+  name: "mira-omf"
+  version: "3.3.1"
+  python_min: "3.10"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  path: ../omf
+
+build:
+  number: 2
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  python:
+    entry_points:
+      - geoh5_to_omf = omf.scripts.geoh5_to_omf:main
+      - omf_to_geoh5 = omf.scripts.omf_to_geoh5:main
+
+requirements:
+  host:
+    - pip
+    - python 3.10.*
+    - poetry-core >=1.0.0
+    - setuptools
+  run:
+    - python >=${{ python_min }}
+    # Mira packages
+    - geoh5py >=0.11.0a, <0.12.dev
+    # direct dependencies
+    - numpy >=1.26.0, <1.27.dev
+    - properties >=0.6, <0.7.dev
+    - pypng 0.20220715.*
+    - six >=1.16.0, <2.0.dev
+    - vectormath 0.2.*
+
+tests:
+  - python:
+      imports:
+        - omf
+      pip_check: false  # unclear why pip check reports that installed versions
+                        # of vectormath and properties are "not supported on this platform"
+                        # while they seem to work fine in the tests
+  - script:
+      - pytest --ignore=tests/version_test.py
+    requirements:
+      run:
+        - pytest
+    files:
+      source:
+        - tests/
+        - docs/images/PointSetGeometry.png
+
+about:
+  summary: API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
+  description: |
+     API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
+  license: MIT
+  license_file:
+    - LICENSE
+  homepage: https://www.mirageoscience.com/mining-industry-software/python-integration/
+  repository: https://github.com/MiraGeoscience/omf
+
+extra:
+  recipe-maintainers:
+    - andrewg-mira
+    - sebhmg
