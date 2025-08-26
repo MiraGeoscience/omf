@@ -12,24 +12,16 @@
 
 from __future__ import annotations
 
+import importlib
 import re
 from pathlib import Path
 
-import tomli as toml
+import pytest
 import yaml
 from jinja2 import Template
 from packaging.version import InvalidVersion, Version
 
 import omf
-
-
-def get_pyproject_version():
-    path = Path(__file__).resolve().parents[1] / "pyproject.toml"
-
-    with open(str(path), encoding="utf-8") as file:
-        pyproject = toml.loads(file.read())
-
-    return pyproject["project"]["version"]
 
 
 def get_conda_recipe_version():
@@ -47,10 +39,44 @@ def get_conda_recipe_version():
 
 
 def test_version_is_consistent():
-    assert omf.__version__ == get_pyproject_version()
-    normalized_conda_version = Version(get_conda_recipe_version())
-    normalized_version = Version(omf.__version__)
-    assert normalized_conda_version == normalized_version
+    project_version = Version(omf.__version__)
+    conda_version = Version(get_conda_recipe_version())
+    assert conda_version.base_version == project_version.base_version
+
+
+def _version_module_exists():
+    try:
+        importlib.import_module("omf._version")
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
+@pytest.mark.skipif(
+    _version_module_exists(),
+    reason="omf._version can be found: package is built",
+)
+def test_fallback_version_is_zero():
+    project_version = Version(omf.__version__)
+    fallback_version = Version("0.0.0.dev0")
+    assert project_version.base_version == fallback_version.base_version
+    assert project_version.pre is None
+    assert project_version.post is None
+    assert project_version.dev == fallback_version.dev
+
+
+@pytest.mark.skipif(
+    not _version_module_exists(),
+    reason="omf._version cannot be found: uses a fallback version",
+)
+def test_conda_version_is_consistent():
+    project_version = Version(omf.__version__)
+    conda_version = Version(get_conda_recipe_version())
+
+    assert conda_version.is_devrelease == project_version.is_devrelease
+    assert conda_version.is_prerelease == project_version.is_prerelease
+    assert conda_version.is_postrelease == project_version.is_postrelease
+    assert conda_version == project_version
 
 
 def version_base_and_pre() -> tuple[str, str]:

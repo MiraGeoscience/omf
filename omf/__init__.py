@@ -16,6 +16,7 @@
 
 import logging
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
 from .base import Project
 from .data import (
@@ -44,7 +45,14 @@ from .texture import ImageTexture
 from .volume import VolumeElement, VolumeGridGeometry
 
 
-__version__ = "3.4.0a1"
+try:
+    from ._version import __version__
+except ModuleNotFoundError:
+    from datetime import datetime
+
+    __date_str = datetime.today().strftime("%Y%m%d")
+    __version__ = "0.0.0.dev0+" + __date_str
+
 __author__ = "Global Mining Standards and Guidelines Group, Mira Geoscience Ltd."
 __license__ = "MIT License"
 __copyright__ = (
