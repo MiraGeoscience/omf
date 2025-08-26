@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: "mira-omf"
-  version: "3.4.0a1"
+  version: "0.0.0.dev0"  # This will be replaced by the actual version in the build process
   python_min: "3.10"
 
 package:
@@ -25,7 +25,8 @@ requirements:
   host:
     - pip
     - python 3.10.*
-    - poetry-core >=1.0.0
+    - poetry-core >=1.8.0
+    - poetry-dynamic-versioning >=1.9, <2.0.dev
     - setuptools
   run:
     - python >=${{ python_min }}
@@ -42,6 +43,7 @@ tests:
   - python:
       imports:
         - omf
+        - omf._version
       pip_check: false  # unclear why pip check reports that installed versions
                         # of vectormath and properties are "not supported on this platform"
                         # while they seem to work fine in the tests
