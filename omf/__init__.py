@@ -16,7 +16,6 @@
 
 import logging
 import sys
-from importlib.metadata import PackageNotFoundError, version
 
 from .base import Project
 from .data import (
