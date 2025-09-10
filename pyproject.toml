@@ -134,6 +134,9 @@ Pygments = '*'
 [tool.pixi.feature.doc.dependencies]
 sphinx = ">=5.3,<6.0"
 
+[tool.pixi.feature.doc.tasks]
+build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
+
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
 #prod-py311 = {features = ["py311"], solve-group = "prod-py311"}
