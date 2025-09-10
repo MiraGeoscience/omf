@@ -18,7 +18,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-from jinja2 import Template
 from packaging.version import InvalidVersion, Version
 
 import omf
@@ -37,7 +36,7 @@ def test_version_is_consistent():
     project_version = Version(omf.__version__)
     conda_version = Version(get_conda_recipe_version())
     # Allow placeholder when using dynamic versioning
-    if conda_version.base_version == "0.0.0":
+    if "0.0.0" in (project_version.base_version, conda_version.base_version):
         assert project_version.base_version != "0.0.0"
     else:
         assert project_version.base_version == conda_version.base_version
