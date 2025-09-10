@@ -66,7 +66,11 @@ author = u'Global Mining Standards and Guidelines Group'
 # built documents.
 
 # The full version.
-release = version("mira-omf")
+try:
+    from importlib.metadata import version
+    release = version("mira-omf")
+except Exception:
+    from omf import __version__ as release
 # The base X.Y.Z version.
 version = Version(release).base_version
 
