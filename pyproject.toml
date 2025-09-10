@@ -125,14 +125,13 @@ pytest-cov = "*"
 pyyaml = '*'
 jinja2 = '*'
 packaging = '*'
-sphinx = ">=5.3,<6.0"
 tomli = "*"  # for tests only
 
 [tool.pixi.feature.dev.dependencies]
 Pygments = '*'
 
 [tool.pixi.feature.doc.dependencies]
-sphinx = ">=5.3,<6.0"
+sphinx = '*'
 
 [tool.pixi.feature.doc.tasks]
 build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
