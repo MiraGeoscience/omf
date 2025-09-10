@@ -26,11 +26,11 @@ authors = [
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
 
 dependencies = [
-  "numpy >=1.26.0,<1.27",
+  "numpy == 1.26.*",
   "properties >=0.6,<0.7",
-  "pypng >=0.20220715",
-  "six >=1.16.0",
-  "vectormath >=0.2,<0.3",
+  "pypng == 0.20220715.*",
+  "six >= 1.16.0, == 1.*",
+  "vectormath == 0.2.*",
 ]
 
 [project.urls]
@@ -112,10 +112,10 @@ platforms = ["win-64", "linux-64"]
 
 [tool.pixi.dependencies]
 # for pixi to resolve dependencies from conda
-numpy = ">=1.26,<1.27"
+numpy = "1.26.*"
 properties = "0.6.*"
-pypng = ">=0.20220715"
-six = ">=1.16.0"
+pypng = "0.20220715.*"
+six = ">=1.16.0,1.*"
 vectormath = "0.2.*"
 
 [tool.pixi.feature.test.dependencies]
@@ -123,20 +123,20 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 pyyaml = '*'
-jinja2 = '*'
 packaging = '*'
-sphinx = ">=5.3,<6.0"
-tomli = "*"  # for tests only
 
 [tool.pixi.feature.dev.dependencies]
 Pygments = '*'
 
 [tool.pixi.feature.doc.dependencies]
-sphinx = ">=5.3,<6.0"
+sphinx = ">=5.3, 5.*"
 
 [tool.pixi.feature.doc.tasks]
 build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
 linkcheck-docs = "pip install -e . && sphinx-build -nW -b linkcheck docs docs/_build"
+
+[tool.pixi.feature.test-doc.tasks]
+test-doc = "pytest docs"
 
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
@@ -151,6 +151,7 @@ py310    = {features = ["py310", "test", "dev-git"], solve-group = "dev-py310"}
 py311    = {features = ["py311", "test", "dev-git"], solve-group = "dev-py311"}
 py312    = {features = ["py312", "test", "dev-git"], solve-group = "dev-py312"}
 docs = {features = ["doc"], no-default-feature = true}
+test-doc = {features = ["py310", "test", "doc"], solve-group = "test-doc"}
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
@@ -165,7 +166,7 @@ python = "3.12.*"
 geoh5py = { git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop" }
 
 [tool.pixi.feature.test.tasks]
-test = "pytest --cov --cov-report=xml"
+test = "pytest tests --cov --cov-report=xml"
 
 [tool.pixi.tasks.show-pip-source]
 args = [{ arg = "packages", "default" = "geoh5py" }]
