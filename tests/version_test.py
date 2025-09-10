@@ -40,7 +40,7 @@ def test_version_is_consistent():
     if conda_version.base_version == "0.0.0":
         assert project_version.base_version != "0.0.0"
     else:
-        assert conda_version.base_version == project_version.base_version
+        assert project_version.base_version == conda_version.base_version
 
 
 def _version_module_exists():
