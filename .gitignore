@@ -144,3 +144,9 @@ dmypy.json
 
 #version ignore
 omf/_version.py
+
+# pixi environments
+.pixi/*
+
+# poetry
+poetry.lock

@@ -18,12 +18,20 @@ description = "API Library for Open Mining Format"
 license = "MIT"
 keywords = ["geology", "geophysics", "earth sciences"]
 readme = "README.rst"
-dynamic = ["version", "dependencies", "classifiers"]
+dynamic = ["version", "classifiers"]
 authors = [
     { name = "Mira Geoscience", email = "support@mirageoscience.com" },
     { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
 ]
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
+
+dependencies = [
+  "numpy >=1.26.0,<1.27",
+  "properties >=0.6,<0.7",
+  "pypng >=0.20220715",
+  "six >=1.16.0",
+  "vectormath >=0.2,<0.3",
+]
 
 [project.urls]
 repository = "https://github.com/MiraGeoscience/omf"
@@ -62,31 +70,13 @@ include = [
     { path = "THIRD_PARTY_SOFTWARE.rst" },
     { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
-version = "0.0.0.dev0"
-
-[tool.poetry.dependencies]
-numpy = "~1.26.0"  # also in geoh5py
-properties = "0.6.*"
-pypng = "^0.20220715"
-six = "^1.16"
-vectormath = "0.2.*"
 
 ## dependencies from Git repositories
 #------------------------------------
 #geoh5py = {version = ">=0.12.0a1, <0.13.dev", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
+#geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
 #geoh5py = {path = "../geoh5py", develop = true}
-
-[tool.poetry.group.dev.dependencies]
-Pygments = "*"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-sphinx = "^5.3"
-pyyaml = '*'
-jinja2 = '*'
-packaging = '*'
-tomli = "*"  # for tests only
+version = "0.0.0.dev0"
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.9.1,<2.0.0", extras = ["plugin"] }
@@ -115,6 +105,81 @@ initial-content = """
 
 [tool.poetry-dynamic-versioning.files."recipe.yaml"]
 persistent-substitution = true
+
+[tool.pixi.project]
+channels = ["https://repo.prefix.dev/conda-forge"]
+platforms = ["win-64", "linux-64"]
+
+[tool.pixi.dependencies]
+# for pixi to resolve dependencies from conda
+numpy = ">=1.26,<1.27"
+properties = "0.6.*"
+pypng = ">=0.20220715"
+six = ">=1.16.0"
+vectormath = "0.2.*"
+
+[tool.pixi.feature.test.dependencies]
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+pyyaml = '*'
+jinja2 = '*'
+packaging = '*'
+tomli = "*"  # for tests only
+
+[tool.pixi.feature.dev.dependencies]
+Pygments = '*'
+
+[tool.pixi.feature.doc.dependencies]
+sphinx = '*'
+
+[tool.pixi.environments]
+#prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
+#prod-py311 = {features = ["py311"], solve-group = "prod-py311"}
+#prod-py312 = {features = ["py312"], solve-group = "prod-py312"}
+#test-prod-py310 = {features = ["py310", "test"], solve-group = "prod-py310"}
+#test-prod-py311 = {features = ["py311", "test"], solve-group = "prod-py311"}
+#test-prod-py312 = {features = ["py312", "test"], solve-group = "prod-py312"}
+
+default  = {features = ["py310", "test", "dev", "dev-git"], solve-group = "dev-py310"}
+py310    = {features = ["py310", "test", "dev-git"], solve-group = "dev-py310"}
+py311    = {features = ["py311", "test", "dev-git"], solve-group = "dev-py311"}
+py312    = {features = ["py312", "test", "dev-git"], solve-group = "dev-py312"}
+docs    = {features = ["doc"], no-default-feature = true}
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+
+[tool.pixi.feature.dev-git.pypi-dependencies]
+geoh5py = { git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop" }
+
+[tool.pixi.feature.test.tasks]
+test = "pytest --cov --cov-report=xml"
+
+[tool.pixi.tasks.show-pip-source]
+args = [{ arg = "packages", "default" = "geoh5py" }]
+cmd = "uv pip show {{packages}}"
+
+[tool.pixi.tasks.use-local-deps]
+args = [{ arg = "packages", default = "geoh5py" }]
+cmd = """
+uv pip install --no-deps --force-reinstall \
+{% for package in packages | split %} -e ../{{ package | trim }}{% endfor %}
+"""
+
+[tool.pixi.feature.test.tasks.test-local]
+args = [{ arg = "packages", default = "geoh5py" }]
+depends-on = [
+    {task = "use-local-deps", args = [ "{{ packages }}" ]},
+    {task = "show-pip-source", args =  [ "{{ packages }}" ]},
+    {task = "test"}
+]
 
 [tool.ruff]
 target-version = "py310"
