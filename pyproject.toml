@@ -13,7 +13,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [project]
 name = "mira-omf"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.9,<4.0"
 description = "API Library for Open Mining Format"
 license = "MIT"
 keywords = ["geology", "geophysics", "earth sciences"]
@@ -125,14 +125,14 @@ pytest-cov = "*"
 pyyaml = '*'
 jinja2 = '*'
 packaging = '*'
-sphinx = "*"
+sphinx = ">=5.3,<6.0"
 tomli = "*"  # for tests only
 
 [tool.pixi.feature.dev.dependencies]
 Pygments = '*'
 
 [tool.pixi.feature.doc.dependencies]
-sphinx = '*'
+sphinx = ">=5.3,<6.0"
 
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
