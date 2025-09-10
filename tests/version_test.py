@@ -36,7 +36,7 @@ def get_conda_recipe_version() -> str | None:
 def test_version_is_consistent():
     project_version = Version(omf.__version__)
     conda_version = Version(get_conda_recipe_version())
-        # Allow placeholder when using dynamic versioning
+    # Allow placeholder when using dynamic versioning
     if conda_version.base_version == "0.0.0":
         assert project_version.base_version != "0.0.0"
     else:
