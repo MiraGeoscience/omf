@@ -125,13 +125,11 @@ pytest-cov = "*"
 pyyaml = '*'
 jinja2 = '*'
 packaging = '*'
+sphinx = "*"
 tomli = "*"  # for tests only
 
 [tool.pixi.feature.dev.dependencies]
 Pygments = '*'
-
-[tool.pixi.feature.doc.dependencies]
-sphinx = '*'
 
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
@@ -145,7 +143,6 @@ default  = {features = ["py310", "test", "dev", "dev-git"], solve-group = "dev-p
 py310    = {features = ["py310", "test", "dev-git"], solve-group = "dev-py310"}
 py311    = {features = ["py311", "test", "dev-git"], solve-group = "dev-py311"}
 py312    = {features = ["py312", "test", "dev-git"], solve-group = "dev-py312"}
-docs    = {features = ["doc"], no-default-feature = true}
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
