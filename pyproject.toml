@@ -135,8 +135,8 @@ sphinx = ">=5.3, 5.*"
 build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
 linkcheck-docs = "pip install -e . && sphinx-build -nW -b linkcheck docs docs/_build"
 
-[tool.pixi.feature.test-doc.tasks]
-test-doc = "pytest docs"
+[tool.pixi.tasks.test-doc]
+cmd = "pytest docs"
 
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
