@@ -135,6 +135,10 @@ sphinx = ">=5.3, 5.*"
 build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
 linkcheck-docs = "pip install -e . && sphinx-build -nW -b linkcheck docs docs/_build"
 
+[tool.pixi.environments.test-doc]
+features = ["py310", "test", "doc"]
+solve-group = "test-doc"
+
 [tool.pixi.tasks.test-doc]
 cmd = "pytest docs"
 
@@ -151,7 +155,6 @@ py310    = {features = ["py310", "test", "dev-git"], solve-group = "dev-py310"}
 py311    = {features = ["py311", "test", "dev-git"], solve-group = "dev-py311"}
 py312    = {features = ["py312", "test", "dev-git"], solve-group = "dev-py312"}
 docs = {features = ["doc"], no-default-feature = true}
-test-doc = {features = ["py310", "test", "doc"], solve-group = "test-doc"}
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
