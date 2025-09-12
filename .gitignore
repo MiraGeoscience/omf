@@ -147,6 +147,7 @@ omf/_version.py
 
 # pixi environments
 .pixi/*
+!.pixi/config.toml
 
 # poetry
 poetry.lock
