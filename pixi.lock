@@ -2904,14 +2904,14 @@ packages:
   timestamp: 1733216573915
 - pypi: ./
   name: mira-omf
-  version: 3.3.2.dev74+cfb00a6
-  sha256: 081ce1e3361a1b1c25992c0ca6bce50c2612df6a2f9315fbc059a99536a9e276
+  version: 3.3.2.dev75+18d28d9
+  sha256: 642920f2e6147053236fb4c70d807b07c95f9c0a15de3994ee63a5ccdbcf6d6a
   requires_dist:
-  - geoh5py>=0.12.0a1,==0.12.*
+  - geoh5py>=0.12.0a1,<0.13.dev0
   - numpy==1.26.*
   - properties==0.6.*
   - pypng==0.20220715.*
-  - six==1.*,>=1.16.0
+  - six>=1.16.0,<2.dev0
   - vectormath==0.2.*
   requires_python: '>=3.9,<4.0'
   editable: true

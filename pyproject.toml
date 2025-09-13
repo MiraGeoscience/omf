@@ -118,12 +118,12 @@ vectormath = "0.2.*"
 
 ## indirect dependencies from remaining pip packages:
 #----------------------------------------------------
-h5py = "*"
-pillow = "*"
-pydantic = "*"
+h5py = ">=3.2.1, 3.*"
+pillow = "10.3.*"
+pydantic = ">=2.7, 2.*"
 
 [tool.pixi.pypi-dependencies]
-mira-omf = { path = ".", editable = true}
+mira-omf = {path = ".", editable = true}
 
 [tool.pixi.environments]
 #prod-py310 = {features = ["py310", "mirageo"], solve-group = "prod-py310"}
@@ -160,11 +160,11 @@ geoh5py = { git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develo
 Pygments = '*'
 
 [tool.pixi.feature.test.dependencies]
+packaging = "*"
 pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 pyyaml = "*"
-packaging = "*"
 
 [tool.pixi.feature.test.tasks]
 test = "pytest tests --cov --cov-report=xml"
