@@ -2904,8 +2904,8 @@ packages:
   timestamp: 1733216573915
 - pypi: ./
   name: mira-omf
-  version: 3.3.2.dev75+18d28d9
-  sha256: 642920f2e6147053236fb4c70d807b07c95f9c0a15de3994ee63a5ccdbcf6d6a
+  version: 3.3.2.dev78+855dcfd
+  sha256: 1fb0bdc43779b5f68c551bc4d0776d82fefbefead2469eaf0457be12490e1786
   requires_dist:
   - geoh5py>=0.12.0a1,<0.13.dev0
   - numpy==1.26.*

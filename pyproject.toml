@@ -21,7 +21,7 @@ keywords = [
   "earth-sciences",
   "geoh5",
   "geology",
-  "geophysics", 
+  "geophysics",
   "interoperability",
   "omf",
   "open-mining-format",
@@ -146,8 +146,8 @@ py311 = {features = ["py311", "mirageo-git", "test"]}
 py312 = {features = ["py312", "mirageo-git", "test"]}
 
 default = {features = ["py310", "mirageo-git", "test", "dev"], solve-group = "default"}
-docs = {features = ["py310", "mirageo-git", "doc"], solve-group = "doc"}
-test-docs = {features = ["py310", "mirageo-git", "test", "doc"], solve-group = "doc"}
+docs = {features = ["py310", "mirageo-git", "doc"], solve-group = "default"}
+test-docs = {features = ["py310", "mirageo-git", "test", "doc"], solve-group = "default"}
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
