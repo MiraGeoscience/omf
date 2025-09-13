@@ -17,7 +17,15 @@ requires-python = ">=3.9,<4.0"
 
 description = "API Library for Open Mining Format"
 license = "MIT"
-keywords = ["geology", "geophysics", "earth sciences"]
+keywords = [
+  "earth-sciences",
+  "geoh5",
+  "geology",
+  "geophysics", 
+  "interoperability",
+  "omf",
+  "open-mining-format",
+]
 readme = "README.rst"
 dynamic = ["version", "classifiers"]
 authors = [
