@@ -70,15 +70,15 @@ include = [
 
 classifiers = [
     'Development Status :: 4 - Beta',
-    'Programming Language :: Python',
-    'Topic :: Scientific/Engineering',
-    'Topic :: Scientific/Engineering :: Mathematics',
-    'Topic :: Scientific/Engineering :: Physics',
+    'Natural Language :: English',
+    'Operating System :: MacOS',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
     'Operating System :: Unix',
-    'Operating System :: MacOS',
-    'Natural Language :: English',
+    'Topic :: Scientific/Engineering :: Mathematics',
+    'Topic :: Scientific/Engineering :: Physics',
+    'Topic :: Scientific/Engineering',
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 version = "0.0.0.dev0"
 
