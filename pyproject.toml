@@ -14,6 +14,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 [project]
 name = "mira-omf"
 requires-python = ">=3.9,<4.0"
+
 description = "API Library for Open Mining Format"
 license = "MIT"
 keywords = ["geology", "geophysics", "earth sciences"]
@@ -26,8 +27,9 @@ authors = [
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
 
 dependencies = [
+  "geoh5py >= 0.12.0a1, == 0.12.*",
   "numpy == 1.26.*",
-  "properties >=0.6,<0.7",
+  "properties == 0.6.*",
   "pypng == 0.20220715.*",
   "six >= 1.16.0, == 1.*",
   "vectormath == 0.2.*",
@@ -35,8 +37,8 @@ dependencies = [
 
 [project.urls]
 repository = "https://github.com/MiraGeoscience/omf"
-#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
 homepage = "https://www.mirageoscience.com/mining-industry-software/python-integration/"
+#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
 
 [project.scripts]
 geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
@@ -44,19 +46,6 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 
 [tool.poetry]
 requires-poetry = '>=2.0,<3.0'
-
-classifiers = [
-    'Development Status :: 4 - Beta',
-    'Programming Language :: Python',
-    'Topic :: Scientific/Engineering',
-    'Topic :: Scientific/Engineering :: Mathematics',
-    'Topic :: Scientific/Engineering :: Physics',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX',
-    'Operating System :: Unix',
-    'Operating System :: MacOS',
-    'Natural Language :: English',
-]
 
 packages = [
     { include = "omf" },
@@ -71,11 +60,18 @@ include = [
     { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
 
-## dependencies from Git repositories
-#------------------------------------
-#geoh5py = {version = ">=0.12.0a1, <0.13.dev", allow-prereleases = true}
-#geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-#geoh5py = {path = "../geoh5py", develop = true}
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Programming Language :: Python',
+    'Topic :: Scientific/Engineering',
+    'Topic :: Scientific/Engineering :: Mathematics',
+    'Topic :: Scientific/Engineering :: Physics',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+    'Natural Language :: English',
+]
 version = "0.0.0.dev0"
 
 [tool.poetry.requires-plugins]
@@ -112,49 +108,38 @@ platforms = ["win-64", "linux-64"]
 
 [tool.pixi.dependencies]
 # for pixi to resolve dependencies from conda
+## direct dependencies:
+#----------------------
 numpy = "1.26.*"
 properties = "0.6.*"
 pypng = "0.20220715.*"
-six = ">=1.16.0,1.*"
+six = ">=1.16.0, 1.*"
 vectormath = "0.2.*"
 
-[tool.pixi.feature.test.dependencies]
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-pyyaml = '*'
-packaging = '*'
+## indirect dependencies from remaining pip packages:
+#----------------------------------------------------
+h5py = "*"
+pillow = "*"
+pydantic = "*"
 
-[tool.pixi.feature.dev.dependencies]
-Pygments = '*'
-
-[tool.pixi.feature.doc.dependencies]
-sphinx = ">=5.3, 5.*"
-
-[tool.pixi.feature.doc.tasks]
-build-docs = "pip install -e . && sphinx-build -nW -b html docs docs/_build"
-linkcheck-docs = "pip install -e . && sphinx-build -nW -b linkcheck docs docs/_build"
-
-[tool.pixi.environments.test-doc]
-features = ["py310", "test", "doc"]
-solve-group = "test-doc"
-
-[tool.pixi.tasks.test-doc]
-cmd = "pytest docs"
+[tool.pixi.pypi-dependencies]
+mira-omf = { path = ".", editable = true}
 
 [tool.pixi.environments]
-#prod-py310 = {features = ["py310"], solve-group = "prod-py310"}
-#prod-py311 = {features = ["py311"], solve-group = "prod-py311"}
-#prod-py312 = {features = ["py312"], solve-group = "prod-py312"}
-#test-prod-py310 = {features = ["py310", "test"], solve-group = "prod-py310"}
-#test-prod-py311 = {features = ["py311", "test"], solve-group = "prod-py311"}
-#test-prod-py312 = {features = ["py312", "test"], solve-group = "prod-py312"}
+#prod-py310 = {features = ["py310", "mirageo"], solve-group = "prod-py310"}
+#prod-py311 = {features = ["py311", "mirageo"], solve-group = "prod-py311"}
+#prod-py312 = {features = ["py312", "mirageo"], solve-group = "prod-py312"}
+#test-prod-py310 = {features = ["py310", "mirageo", "test"], solve-group = "prod-py310"}
+#test-prod-py311 = {features = ["py311", "mirageo", "test"], solve-group = "prod-py311"}
+#test-prod-py312 = {features = ["py312", "mirageo", "test"], solve-group = "prod-py312"}
 
-default  = {features = ["py310", "test", "dev", "dev-git"], solve-group = "dev-py310"}
-py310    = {features = ["py310", "test", "dev-git"], solve-group = "dev-py310"}
-py311    = {features = ["py311", "test", "dev-git"], solve-group = "dev-py311"}
-py312    = {features = ["py312", "test", "dev-git"], solve-group = "dev-py312"}
-docs = {features = ["doc"], no-default-feature = true}
+py310 = {features = ["py310", "mirageo-git", "test"], solve-group = "default"}
+py311 = {features = ["py311", "mirageo-git", "test"]}
+py312 = {features = ["py312", "mirageo-git", "test"]}
+
+default = {features = ["py310", "mirageo-git", "test", "dev"], solve-group = "default"}
+docs = {features = ["py310", "mirageo-git", "doc"], solve-group = "doc"}
+test-docs = {features = ["py310", "mirageo-git", "test", "doc"], solve-group = "doc"}
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
@@ -165,11 +150,50 @@ python = "3.11.*"
 [tool.pixi.feature.py312.dependencies]
 python = "3.12.*"
 
-[tool.pixi.feature.dev-git.pypi-dependencies]
+#[tool.pixi.feature.mirageo.dependencies]
+#geoh5py = ">=0.12.0a1, 0.12.*"
+
+[tool.pixi.feature.mirageo-git.pypi-dependencies]
 geoh5py = { git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop" }
+
+[tool.pixi.feature.dev.dependencies]
+Pygments = '*'
+
+[tool.pixi.feature.test.dependencies]
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+pyyaml = "*"
+packaging = "*"
 
 [tool.pixi.feature.test.tasks]
 test = "pytest tests --cov --cov-report=xml"
+_pytest-docs = "pytest docs"
+
+[tool.pixi.feature.test.tasks.test-local]
+args = [{ arg = "packages", default = "geoh5py" }]
+depends-on = [
+    {task = "use-local-deps", args = [ "{{ packages }}" ]},
+    {task = "show-pip-source", args =  [ "{{ packages }}" ]},
+    {task = "test"}
+]
+
+[tool.pixi.feature.doc.dependencies]
+sphinx = ">=5.3, 5.*"
+
+[tool.pixi.feature.doc.tasks]
+build-docs = "sphinx-build -nW -b html docs docs/_build"
+linkcheck-docs = "sphinx-build -nW -b linkcheck docs docs/_build"
+
+[tool.pixi.tasks.test-pyvers]
+depends-on = [
+    {task = "test", environment = "py310"},
+    {task = "test", environment = "py311"},
+    {task = "test", environment = "py312"},
+]
+
+[tool.pixi.tasks.test-docs]
+depends-on = [{task = "_pytest-docs", environment = "test-docs"}]
 
 [tool.pixi.tasks.show-pip-source]
 args = [{ arg = "packages", "default" = "geoh5py" }]
@@ -181,14 +205,6 @@ cmd = """
 uv pip install --no-deps --force-reinstall \
 {% for package in packages | split %} -e ../{{ package | trim }}{% endfor %}
 """
-
-[tool.pixi.feature.test.tasks.test-local]
-args = [{ arg = "packages", default = "geoh5py" }]
-depends-on = [
-    {task = "use-local-deps", args = [ "{{ packages }}" ]},
-    {task = "show-pip-source", args =  [ "{{ packages }}" ]},
-    {task = "test"}
-]
 
 [tool.ruff]
 target-version = "py310"
