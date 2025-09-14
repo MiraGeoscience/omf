@@ -18,11 +18,15 @@ requires-python = ">=3.9,<4.0"
 description = "API Library for Open Mining Format"
 license = "MIT"
 keywords = [
+  "data",
+  "data-format",
+  "data-management",
   "earth-sciences",
   "geoh5",
   "geology",
   "geophysics",
   "interoperability",
+  "mining",
   "omf",
   "open-mining-format",
 ]
@@ -69,15 +73,17 @@ include = [
 ]
 
 classifiers = [
-    'Development Status :: 4 - Beta',
-    'Natural Language :: English',
-    'Operating System :: MacOS',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX',
-    'Operating System :: Unix',
-    'Topic :: Scientific/Engineering :: Mathematics',
-    'Topic :: Scientific/Engineering :: Physics',
-    'Topic :: Scientific/Engineering',
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 version = "0.0.0.dev0"
