@@ -13,22 +13,44 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [project]
 name = "mira-omf"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.9,<4.0"
+
 description = "API Library for Open Mining Format"
 license = "MIT"
-keywords = ["geology", "geophysics", "earth sciences"]
+keywords = [
+  "data",
+  "data-format",
+  "data-management",
+  "earth-sciences",
+  "geoh5",
+  "geology",
+  "geophysics",
+  "interoperability",
+  "mining",
+  "omf",
+  "open-mining-format",
+]
 readme = "README.rst"
-dynamic = ["version", "dependencies", "classifiers"]
+dynamic = ["version", "classifiers"]
 authors = [
     { name = "Mira Geoscience", email = "support@mirageoscience.com" },
     { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
 ]
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
 
+dependencies = [
+  "geoh5py >= 0.12.0a1, == 0.12.*",
+  "numpy == 1.26.*",
+  "properties == 0.6.*",
+  "pypng == 0.20220715.*",
+  "six >= 1.16.0, == 1.*",
+  "vectormath == 0.2.*",
+]
+
 [project.urls]
 repository = "https://github.com/MiraGeoscience/omf"
-#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
 homepage = "https://www.mirageoscience.com/mining-industry-software/python-integration/"
+#documentation  = "https://mirageoscience-omf.readthedocs-hosted.com/"
 
 [project.scripts]
 geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
@@ -36,19 +58,6 @@ omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 
 [tool.poetry]
 requires-poetry = '>=2.0,<3.0'
-
-classifiers = [
-    'Development Status :: 4 - Beta',
-    'Programming Language :: Python',
-    'Topic :: Scientific/Engineering',
-    'Topic :: Scientific/Engineering :: Mathematics',
-    'Topic :: Scientific/Engineering :: Physics',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX',
-    'Operating System :: Unix',
-    'Operating System :: MacOS',
-    'Natural Language :: English',
-]
 
 packages = [
     { include = "omf" },
@@ -62,31 +71,22 @@ include = [
     { path = "THIRD_PARTY_SOFTWARE.rst" },
     { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
 ]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 version = "0.0.0.dev0"
-
-[tool.poetry.dependencies]
-numpy = "~1.26.0"  # also in geoh5py
-properties = "0.6.*"
-pypng = "^0.20220715"
-six = "^1.16"
-vectormath = "0.2.*"
-
-## dependencies from Git repositories
-#------------------------------------
-#geoh5py = {version = ">=0.12.0a1, <0.13.dev", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-#geoh5py = {path = "../geoh5py", develop = true}
-
-[tool.poetry.group.dev.dependencies]
-Pygments = "*"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-sphinx = "^5.3"
-pyyaml = '*'
-jinja2 = '*'
-packaging = '*'
-tomli = "*"  # for tests only
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.9.1,<2.0.0", extras = ["plugin"] }
@@ -182,6 +182,7 @@ plugins = [
 ]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true

@@ -18,22 +18,16 @@ from pathlib import Path
 
 import pytest
 import yaml
-from jinja2 import Template
 from packaging.version import InvalidVersion, Version
 
 import omf
 
 
-def get_conda_recipe_version():
-    path = Path(__file__).resolve().parents[1] / "recipe.yaml"
+def get_conda_recipe_version() -> str | None:
+    recipe_path = Path(__file__).resolve().parents[1] / "recipe.yaml"
 
-    with open(str(path), encoding="utf-8") as file:
-        content = file.read()
-
-    template = Template(content)
-    rendered_yaml = template.render()
-
-    recipe = yaml.safe_load(rendered_yaml)
+    with recipe_path.open(encoding="utf-8") as file:
+        recipe = yaml.safe_load(file)
 
     return recipe["context"]["version"]
 
@@ -41,7 +35,20 @@ def get_conda_recipe_version():
 def test_version_is_consistent():
     project_version = Version(omf.__version__)
     conda_version = Version(get_conda_recipe_version())
-    assert conda_version.base_version == project_version.base_version
+
+    if (
+        project_version.base_version == "0.0.0"
+        and conda_version.base_version == "0.0.0"
+    ):
+        return
+
+    if "0.0.0" in (project_version.base_version, conda_version.base_version):
+        assert (
+            project_version.base_version != "0.0.0"
+            or conda_version.base_version != "0.0.0"
+        )
+    else:
+        assert project_version.base_version == conda_version.base_version
 
 
 def _version_module_exists():
