@@ -29,15 +29,15 @@ the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
 
     The main additions are two scripts for converting between OMF and geoh5:
 
-    - OMF to geoh5 file format: :py:meth:`omf.scripts.omf_to_geoh5 <omf.scripts.omf_to_geoh5>`
-    - Geoh5 to OMF: :py:meth:`omf.scripts.geoh5_to_omf <omf.scripts.geoh5_to_omf>`
+    - OMF to geoh5 file format: `omf.scripts.omf_to_geoh5`
+    - Geoh5 to OMF: `omf.scripts.geoh5_to_omf`
 
     The following objects are supported for conversion between OMF and geoh5:
 
-    - Scatter data:py:class:`omf.pointet.PointSetElement <omf.pointet.PointSetElement>` to :py:class:`geoh5py.objects.Points <geoh5py.objects.points.Points>`
-    - Curve data :py:class:`omf.lineset.LineSetElement <omf.lineset.LineSetElement>` to :py:class:`geoh5py.objects.Curve <geoh5py.objects.curve.Curve>`
-    - Surface data :py:class:`omf.surface.SurfaceElement <omf.surface.SurfaceElement>` to :py:class:`geoh5py.objects.Surface <geoh5py.objects.surface.Surface>`
-    - 3D Grid data :py:class:`omf.volume.VolumeElement <omf.volume.VolumeElement>` to :py:class:`geoh5py.objects.BlockModel <geoh5py.objects.BlockModel>`
+    - Scatter data `omf.pointet.PointSetElement` to `geoh5py.objects.Points`
+    - Curve data `omf.lineset.LineSetElement` to `geoh5py.objects.Curve`
+    - Surface data `omf.surface.SurfaceElement` to `geoh5py.objects.Surface`
+    - 3D Grid data `omf.volume.VolumeElement` to `geoh5py.objects.BlockModel`
 
     The following data types are supported for conversion between OMF and geoh5:
 
