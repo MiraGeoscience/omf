@@ -25,7 +25,30 @@ the `Global Mining Standards & Guidelines Group <https://gmggroup.org/>`_.
 .. warning::
 
     This is a fork created by Mira Geoscience for interoperability with the
-    geoh5 file format.
+    geoh5 file format. It is not maintained by GMG.
+
+    The main additions are two scripts for converting between OMF and geoh5:
+
+    - OMF to geoh5 file format: `omf.scripts.omf_to_geoh5`
+    - Geoh5 to OMF: `omf.scripts.geoh5_to_omf`
+
+    The following objects are supported for conversion between OMF and geoh5:
+
+    - Scatter data `omf.pointet.PointSetElement` to `geoh5py.objects.Points`
+    - Curve data `omf.lineset.LineSetElement` to `geoh5py.objects.Curve`
+    - Surface data `omf.surface.SurfaceElement` to `geoh5py.objects.Surface`
+    - 3D Grid data `omf.volume.VolumeElement` to `geoh5py.objects.BlockModel`
+
+    The following data types are supported for conversion between OMF and geoh5:
+
+    - Float data arrays
+    - Integer data arrays
+    - String data arrays
+    - Referenced data with colormap arrays
+
+    Note that "no-data-value" are not supported by the OMF standard for Integer data arrays.
+    When converting from geoh5 to OMF, any Integer data arrays containing no-data-values are converted to Float data arrays.
+
 
 Why?
 ----
