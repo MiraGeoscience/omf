@@ -16,6 +16,10 @@ name = "mira-omf"
 requires-python = ">=3.10,<4.0"
 description = "API Library for Open Mining Format"
 license = "MIT"
+license-files = [
+    "LICENSE",
+    "THIRD_PARTY_SOFTWARE.rst",
+]
 keywords = ["geology", "geophysics", "earth sciences"]
 readme = "README.rst"
 dynamic = ["version", "dependencies", "classifiers"]
@@ -55,12 +59,7 @@ packages = [
 ]
 
 include = [
-    { path = "COPYING" },
-    { path = "COPYING.LESSER" },
-    { path = "LICENSE" },
-    { path = "README.rst" },
-    { path = "THIRD_PARTY_SOFTWARE.rst" },
-    { path = "docs/**/THIRD_PARTY_SOFTWARE.rst" },
+    { path = "omf/_version.py", format = ["sdist", "wheel"] },
 ]
 version = "0.0.0.dev0"
 
