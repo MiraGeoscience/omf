@@ -1,5 +1,3 @@
-"""Test the version follows SemVer and is consistent across files."""
-
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
 #                                                                              '
@@ -10,31 +8,24 @@
 #                                                                              '
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
+
 from __future__ import annotations
 
 import importlib
-import re
 from pathlib import Path
 
 import pytest
 import yaml
-from jinja2 import Template
 from packaging.version import InvalidVersion, Version
 
 import omf
 
 
 def get_conda_recipe_version():
-    path = Path(__file__).resolve().parents[1] / "recipe.yaml"
+    recipe_path = Path(__file__).resolve().parents[1] / "recipe.yaml"
 
-    with open(str(path), encoding="utf-8") as file:
-        content = file.read()
-
-    template = Template(content)
-    rendered_yaml = template.render()
-
-    recipe = yaml.safe_load(rendered_yaml)
-
+    with recipe_path.open(encoding="utf-8") as file:
+        recipe = yaml.safe_load(file)
     return recipe["context"]["version"]
 
 
@@ -79,15 +70,9 @@ def test_conda_version_is_consistent():
     assert conda_version == project_version
 
 
-def version_base_and_pre() -> tuple[str, str]:
-    """
-    Return a tuple ith the version base and its prerelease segment
-    (if present the build segment (+) is also in the 2nd tuple element).
-    """
-    version_re = r"^([^-+\s]*)(-\S*)?\s*$"
-    match = re.match(version_re, omf.__version__)
-    assert match is not None
-    return match[1], match[2]
+def test_conda_version_is_pep440():
+    version = Version(get_conda_recipe_version())
+    assert version is not None
 
 
 def validate_version(version_str):

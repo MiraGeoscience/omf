@@ -83,9 +83,7 @@ pytest = "*"
 pytest-cov = "*"
 sphinx = "^5.3"
 pyyaml = '*'
-jinja2 = '*'
 packaging = '*'
-tomli = "*"  # for tests only
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.9.1,<2.0.0", extras = ["plugin"] }
