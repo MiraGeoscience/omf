@@ -4,6 +4,7 @@ context:
   name: "mira-omf"
   version: "0.0.0.dev0"  # This will be replaced by the actual version in the build process
   python_min: "3.10"
+  module_name: omf
 
 package:
   name: ${{ name|lower }}
@@ -56,6 +57,9 @@ tests:
       source:
         - tests/
         - docs/images/PointSetGeometry.png
+  - package_contents:
+      files:
+        - site-packages/${{ module_name }}/_version.py
 
 about:
   summary: API library for Open Mining Format, a new standard for mining data backed by the Global Mining Standards & Guidelines Group.
