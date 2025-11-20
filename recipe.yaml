@@ -43,8 +43,8 @@ requirements:
 tests:
   - python:
       imports:
-        - omf
-        - omf._version
+        - ${{ module_name }}
+        - ${{ module_name }}._version
       pip_check: false  # unclear why pip check reports that installed versions
                         # of vectormath and properties are "not supported on this platform"
                         # while they seem to work fine in the tests
