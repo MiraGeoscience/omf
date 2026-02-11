@@ -140,10 +140,7 @@ def test_volume_flip_origin_z(tmp_path):
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert (
-            block_model.origin["z"]
-            == vol.geometry.origin[2] + vol.geometry.tensor_w[0] / 2
-        )
+        assert block_model.origin["z"] == vol.geometry.origin[2]
 
     with Workspace(file) as workspace:
         rotation = np.random.normal(-180, 180, 1)

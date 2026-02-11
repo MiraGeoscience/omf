@@ -1204,7 +1204,13 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             geometry["axis_w"] = np.r_[0, 0, axis[2]]
 
             if hasattr(entity, "origin"):
-                geometry.update({"origin": np.r_[list(entity.origin)]})
+                geometry.update(
+                    {
+                        "origin": np.r_[
+                            entity.origin["x"], entity.origin["y"], entity.origin["z"]
+                        ]
+                    }
+                )
             kwargs.update({"geometry": geometry})
 
         return kwargs
