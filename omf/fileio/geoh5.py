@@ -297,10 +297,7 @@ class BaseConversion(ABC):
                     kwargs = conversion.collect_attributes(element, workspace, **kwargs)
                 else:
                     if isinstance(element, UidModel):
-                        if key == "origin":
-                            prop = getattr(element, key, None)
-                        else:
-                            prop = getattr(element, key, None)
+                        prop = getattr(element, key, None)
                         label = alias
                     else:
                         prop = getattr(element, alias, None)
