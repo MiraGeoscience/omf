@@ -1167,20 +1167,17 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
                 f"{VolumeGridGeometry} with 3D rotation axes."
             )
 
-        offsets = []
         for key, alias in cls._attribute_map.items():
             tensor = getattr(element.geometry, f"tensor_{key}")
-            axis = getattr(element.geometry, f"axis_{key}")
-            offsets.append(axis * tensor[0] / 2.0)
             cell_delimiter = np.r_[0, np.cumsum(tensor)]
             kwargs.update({f"{alias}_cell_delimiters": cell_delimiter})
-        offsets = np.c_[offsets].sum(axis=1)
+
         kwargs["z_cell_delimiters"] *= element.geometry.axis_w[-1]
         rotation = np.rad2deg(
             np.arctan2(element.geometry.axis_u[1], element.geometry.axis_u[0])
         )
         kwargs.update({"rotation": rotation})
-        kwargs.update({"origin": np.r_[element.geometry.origin] - offsets})
+        kwargs.update({"origin": np.r_[element.geometry.origin]})
 
         return kwargs
 
@@ -1203,20 +1200,11 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             geometry["axis_v"] = rot.dot(np.c_[0.0, axis[1], 0.0].T).flatten()
             geometry["axis_w"] = np.r_[0, 0, axis[2]]
 
-            offsets = []
-            for key in cls._attribute_map:
-                offsets.append(
-                    geometry[f"axis_{key}"] * geometry[f"tensor_{key}"][0] / 2.0
-                )
-
-            offsets = np.c_[offsets].sum(axis=1)
             if hasattr(entity, "origin"):
                 geometry.update(
                     {
                         "origin": np.r_[
-                            entity.origin["x"] + offsets[0],
-                            entity.origin["y"] + offsets[1],
-                            entity.origin["z"] + offsets[2],
+                            entity.origin["x"], entity.origin["y"], entity.origin["z"]
                         ]
                     }
                 )

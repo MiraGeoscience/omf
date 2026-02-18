@@ -20,7 +20,8 @@ from geoh5py.workspace import Workspace
 
 import omf
 from omf import Project
-from omf.fileio.geoh5 import block_model_reordering
+from omf.fileio import OMFWriter
+from omf.fileio.geoh5 import GeoH5Reader, block_model_reordering
 
 
 def test_volume_to_geoh5(tmp_path: Path):
@@ -115,6 +116,9 @@ def test_volume_to_geoh5(tmp_path: Path):
 
     omf.fileio.utils.compare_elements(omf_vol, vol)
 
+    reader = GeoH5Reader(file)
+    OMFWriter(reader(), str(tmp_path / f"{__name__}.omf"))
+
 
 def test_volume_flip_origin_z(tmp_path):
     dims = [10, 15, 20]
@@ -136,10 +140,7 @@ def test_volume_flip_origin_z(tmp_path):
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert (
-            block_model.origin["z"]
-            == vol.geometry.origin[2] + vol.geometry.tensor_w[0] / 2
-        )
+        assert block_model.origin["z"] == vol.geometry.origin[2]
 
     with Workspace(file) as workspace:
         rotation = np.random.normal(-180, 180, 1)
