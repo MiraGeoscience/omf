@@ -17,6 +17,8 @@ on:
       - feature/**
       - hotfix/**
 
+  workflow_dispatch:
+
 permissions: {}
 
 concurrency:
