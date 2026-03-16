@@ -81,7 +81,7 @@ Pygments = "*"
 pylint = "*"
 pytest = "*"
 pytest-cov = "*"
-sphinx = "^5.3"
+sphinx = "*"
 pyyaml = '*'
 packaging = '*'
 
