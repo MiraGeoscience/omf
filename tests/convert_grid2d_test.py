@@ -22,7 +22,7 @@ import omf
 def test_grid2d_to_geoh5(tmp_path: Path, caplog):
     """Test pointset geometry validation"""
 
-    dip = np.random.uniform(low=0.0, high=np.pi/2, size=1)
+    dip = np.random.uniform(low=0.0, high=np.pi / 2, size=1)
     rotation = np.random.uniform(low=-np.pi, high=np.pi, size=1)
     rot_op = omf.fileio.geoh5.rotation_opt(rotation, dip)
     grid = omf.SurfaceElement(

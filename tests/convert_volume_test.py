@@ -50,9 +50,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data",
                 location="cells",
-                array=np.random.randint(-1, 3, size)
-                .flatten()
-                .astype(np.int32),
+                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(values=omf.StringArray(array=["abc", "123", "@#$%"])),
                     omf.Legend(
@@ -69,9 +67,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data 2",
                 location="cells",
-                array=np.random.randint(-1, 3, size)
-                .flatten()
-                .astype(np.int32),
+                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(
                         values=omf.ColorArray(
