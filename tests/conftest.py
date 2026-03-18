@@ -116,7 +116,7 @@ def random_project() -> omf.Project:
             ),
             omf.ScalarData(
                 name="rand face data",
-                array=np.random.rand(10, 15).flatten(order="f"),
+                array=np.random.rand(10, 15).flatten(order="F"),
                 location="faces",
             ),
         ],
