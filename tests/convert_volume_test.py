@@ -27,6 +27,7 @@ from omf.fileio.geoh5 import GeoH5Reader, block_model_reordering
 def test_volume_to_geoh5(tmp_path: Path):
     """Test pointset geometry validation"""
     dims = [10, 15, 20]
+    size = int(np.prod(dims))
     vol = omf.VolumeElement(
         name="vol",
         geometry=omf.VolumeGridGeometry(
@@ -39,17 +40,17 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.ScalarData(
                 name="Random Int Data",
                 location="cells",
-                array=np.arange(np.prod(dims)).flatten().astype(np.int32),
+                array=np.arange(size).flatten().astype(np.int32),
             ),
             omf.ScalarData(
                 name="Random Float Data",
                 location="cells",
-                array=np.random.randn(np.prod(dims)),
+                array=np.random.randn(size),
             ),
             omf.MappedData(
                 name="Reference Data",
                 location="cells",
-                array=np.random.randint(-1, 3, np.prod(dims))
+                array=np.random.randint(-1, 3, size)
                 .flatten()
                 .astype(np.int32),
                 legends=[
@@ -68,7 +69,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data 2",
                 location="cells",
-                array=np.random.randint(-1, 3, np.prod(dims))
+                array=np.random.randint(-1, 3, size)
                 .flatten()
                 .astype(np.int32),
                 legends=[
