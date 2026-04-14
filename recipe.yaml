@@ -39,7 +39,7 @@ requirements:
     - pypng 0.20220715.*
     - six >=1.16.0, 1.*
     - vectormath 0.2.*
-    - standard-imghdr 3.13.0
+    - standard-imghdr 3.13.*
 
 tests:
   - python:
