@@ -50,7 +50,9 @@ def test_project_compression(random_project: omf.Project, tmp_path: Path):
     size_med_comp = os.stat(file_med_comp).st_size
     size_high_comp = os.stat(file_high_comp).st_size
 
-    assert size_low_comp > size_med_comp > size_high_comp
+    assert size_low_comp > size_high_comp
+    assert size_low_comp > size_med_comp
+    assert size_med_comp > size_high_comp
 
 
 def test_container_group(random_project: omf.Project, tmp_path: Path):
