@@ -14,7 +14,6 @@ import logging
 import os
 from pathlib import Path
 
-import pytest
 from geoh5py.groups import ContainerGroup
 from geoh5py.workspace import Workspace
 
@@ -37,7 +36,6 @@ def test_project_to_geoh5(random_project: omf.Project, tmp_path: Path, caplog):
     assert len(project.elements) == len(random_project.elements)
 
 
-@pytest.mark.skip(reason="broken: compression level has no effect. To be fixed")
 def test_project_compression(random_project: omf.Project, tmp_path: Path):
     """Test pointset geometry validation"""
     file_low_comp = str(tmp_path / "project_low_comp.geoh5")
