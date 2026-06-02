@@ -11,7 +11,7 @@
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 from __future__ import annotations
-
+from pathlib import Path
 import json
 import struct
 import uuid
@@ -50,11 +50,15 @@ class OMFWriter:
 
         Binary data is written during project serialization
         """
-        if not fname.endswith(".omf"):
-            fname = fname + ".omf"
+        file_name = Path(fname)
+        if not file_name.suffix:
+            file_name.with_suffix(".omf")
 
-        self.fname = fname
-        with open(fname, "wb") as fopen:
+        if file_name.suffix != ".omf":
+            raise ValueError("OMFWriter only supports .omf file extensions.")
+
+        self.fname = file_name
+        with open(file_name, "wb") as fopen:
             self.initialize_header(fopen, project.uid)
             self.project_json = project.serialize(open_file=fopen)
             self.update_header(fopen)

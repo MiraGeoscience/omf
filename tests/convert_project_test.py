@@ -43,7 +43,7 @@ def test_project_compression(random_project: omf.Project, tmp_path: Path):
     file_high_comp = str(tmp_path / "project_high_comp.geoh5")
 
     omf.GeoH5Writer(random_project, file_low_comp, compression=1, page_size=512)
-    omf.GeoH5Writer(random_project, file_med_comp, compression=5, page_size=512)
+    omf.GeoH5Writer(random_project, file_med_comp, compression=3, page_size=512)
     omf.GeoH5Writer(random_project, file_high_comp, compression=9, page_size=512)
 
     size_low_comp = os.stat(file_low_comp).st_size

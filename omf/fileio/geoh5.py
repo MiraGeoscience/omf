@@ -85,7 +85,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         element: UidModel,
-        file_name: str | Path | Workspace,
+        file_name: str | Path,
         compression: int = 5,
         page_size: int = DEFAULT_PAGE_SIZE,
     ):
@@ -121,12 +121,13 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
             raise TypeError("Input 'file' must be of str or Path.")
 
         file_path = Path(file)
-        if not file_path.exists():
-            h5file = Workspace.create(file, page_size=self.page_size)
-            h5file.close()
 
         if file_path.suffix != ".geoh5":
             raise ValueError("Input 'file' must be a '.geoh5' file.")
+
+        if not file_path.exists():
+            h5file = Workspace.create(file, page_size=self.page_size)
+            h5file.close()
 
         return file_path
 

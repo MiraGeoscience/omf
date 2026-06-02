@@ -25,17 +25,17 @@ def random_project() -> omf.Project:
     png_file_path = tests_dir.parent / "docs" / "images" / "PointSetGeometry.png"
     proj = omf.Project(name="Test project", description="Just some assorted elements")
 
+    vertices = np.repeat(np.arange(1000).reshape(-1, 1), 3, axis=1).astype(float)
+    values = np.arange(1000).astype(float)
     pts = omf.PointSetElement(
         name="Random Points",
         description="Just random points",
-        geometry=omf.PointSetGeometry(vertices=np.random.rand(50000, 3)),
+        geometry=omf.PointSetGeometry(vertices=vertices),
         data=[
-            omf.ScalarData(
-                name="rand data", array=np.random.rand(50000), location="vertices"
-            ),
+            omf.ScalarData(name="rand data", array=values, location="vertices"),
             omf.ScalarData(
                 name="More rand data",
-                array=np.random.rand(50000),
+                array=values,
                 location="vertices",
             ),
         ],
@@ -61,13 +61,13 @@ def random_project() -> omf.Project:
     lin = omf.LineSetElement(
         name="Random Line",
         geometry=omf.LineSetGeometry(
-            vertices=np.random.rand(50000, 3),
+            vertices=vertices,
             segments=np.floor(np.random.rand(50, 2) * 100).astype(int),
         ),
         data=[
             omf.ScalarData(
                 name="rand vert data",
-                array=np.random.rand(50000),
+                array=values,
                 location="vertices",
             ),
             omf.ScalarData(
@@ -82,13 +82,13 @@ def random_project() -> omf.Project:
     surf = omf.SurfaceElement(
         name="trisurf",
         geometry=omf.SurfaceGeometry(
-            vertices=np.random.rand(50000, 3),
+            vertices=vertices,
             triangles=np.floor(np.random.rand(50, 3) * 100).astype(int),
         ),
         data=[
             omf.ScalarData(
                 name="rand vert data",
-                array=np.random.rand(50000),
+                array=values,
                 location="vertices",
             ),
             omf.ScalarData(
