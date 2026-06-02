@@ -18,7 +18,7 @@ import uuid
 
 from omf.base import UidModel
 from omf.fileio.geoh5 import GeoH5Writer
-
+from geoh5py.shared.utils import DEFAULT_PAGE_SIZE
 
 __version__ = b"OMF-v0.9.0"
 
@@ -47,24 +47,20 @@ class OMFWriter:
     in the binary blob.
     """
 
-    def __init__(self, project: UidModel, fname: str, compression: int = 5):
+    def __init__(self, project: UidModel, fname: str):
         """Project serialization is performed on OMFWriter init
 
         Binary data is written during project serialization
         """
+        if not fname.endswith(".omf"):
+            fname = fname + ".omf"
 
-        if fname.endswith(".geoh5"):
-            GeoH5Writer(project, fname, compression=compression)
-        else:
-            if not fname.endswith(".omf"):
-                fname = fname + ".omf"
-
-            self.fname = fname
-            with open(fname, "wb") as fopen:
-                self.initialize_header(fopen, project.uid)
-                self.project_json = project.serialize(open_file=fopen)
-                self.update_header(fopen)
-                fopen.write(json.dumps(self.project_json).encode("utf-8"))
+        self.fname = fname
+        with open(fname, "wb") as fopen:
+            self.initialize_header(fopen, project.uid)
+            self.project_json = project.serialize(open_file=fopen)
+            self.update_header(fopen)
+            fopen.write(json.dumps(self.project_json).encode("utf-8"))
 
     @staticmethod
     def initialize_header(fopen, uid):

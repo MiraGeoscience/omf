@@ -37,7 +37,7 @@ def test_lineset_to_geoh5(tmp_path: Path):
         color="#0000FF",
     )
     file = str(tmp_path / "lineset.geoh5")
-    omf.OMFWriter(line, file)
+    omf.GeoH5Writer(line, file)
 
     with Workspace(file) as workspace:
         curve = workspace.get_entity("Random Line")[0]

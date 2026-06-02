@@ -28,14 +28,14 @@ def random_project() -> omf.Project:
     pts = omf.PointSetElement(
         name="Random Points",
         description="Just random points",
-        geometry=omf.PointSetGeometry(vertices=np.random.rand(100, 3)),
+        geometry=omf.PointSetGeometry(vertices=np.random.rand(50000, 3)),
         data=[
             omf.ScalarData(
-                name="rand data", array=np.random.rand(100), location="vertices"
+                name="rand data", array=np.random.rand(50000), location="vertices"
             ),
             omf.ScalarData(
                 name="More rand data",
-                array=np.random.rand(100),
+                array=np.random.rand(50000),
                 location="vertices",
             ),
         ],
@@ -61,13 +61,13 @@ def random_project() -> omf.Project:
     lin = omf.LineSetElement(
         name="Random Line",
         geometry=omf.LineSetGeometry(
-            vertices=np.random.rand(100, 3),
+            vertices=np.random.rand(50000, 3),
             segments=np.floor(np.random.rand(50, 2) * 100).astype(int),
         ),
         data=[
             omf.ScalarData(
                 name="rand vert data",
-                array=np.random.rand(100),
+                array=np.random.rand(50000),
                 location="vertices",
             ),
             omf.ScalarData(
@@ -82,13 +82,13 @@ def random_project() -> omf.Project:
     surf = omf.SurfaceElement(
         name="trisurf",
         geometry=omf.SurfaceGeometry(
-            vertices=np.random.rand(100, 3),
+            vertices=np.random.rand(50000, 3),
             triangles=np.floor(np.random.rand(50, 3) * 100).astype(int),
         ),
         data=[
             omf.ScalarData(
                 name="rand vert data",
-                array=np.random.rand(100),
+                array=np.random.rand(50000),
                 location="vertices",
             ),
             omf.ScalarData(
