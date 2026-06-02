@@ -17,8 +17,6 @@ import struct
 import uuid
 
 from omf.base import UidModel
-from omf.fileio.geoh5 import GeoH5Writer
-from geoh5py.shared.utils import DEFAULT_PAGE_SIZE
 
 __version__ = b"OMF-v0.9.0"
 
