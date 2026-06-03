@@ -107,9 +107,13 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
     def entity(self, element: UidModel):
         with fetch_active_workspace(self.file) as workspace:
             if isinstance(element, Project):
-                converter = ProjectConversion(element, workspace, self.compression)
+                converter = ProjectConversion(
+                    element, workspace, compression=self.compression
+                )
             else:
-                converter = get_conversion_map(element, workspace, self.compression)
+                converter = get_conversion_map(
+                    element, workspace, compression=self.compression
+                )
 
             self._entity = converter.from_omf(element)
 
@@ -562,6 +566,7 @@ class ProjectConversion(BaseConversion):
         self,
         element: UidModel | Entity,
         geoh5: Workspace,
+        *,
         compression: int = 5,
         parent=None,
         page_size: int = DEFAULT_PAGE_SIZE,
