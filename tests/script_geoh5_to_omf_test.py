@@ -39,7 +39,7 @@ def geoh5_input_path_fixture(request, tmp_path_factory) -> Path:
     )
 
     file_path = tmp_path_factory.mktemp("input") / request.param
-    omf.OMFWriter(points, str(file_path))
+    omf.GeoH5Writer(points, str(file_path))
     return file_path
 
 
