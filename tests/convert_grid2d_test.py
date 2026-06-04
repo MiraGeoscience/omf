@@ -50,7 +50,7 @@ def test_grid2d_to_geoh5(tmp_path: Path, caplog):
     )
     file = str(tmp_path / "grid2d.geoh5")
 
-    omf.OMFWriter(grid, file)
+    omf.GeoH5Writer(grid, file)
     warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
     assert len(warning_records) == 1
 

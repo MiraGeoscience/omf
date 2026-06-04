@@ -85,7 +85,7 @@ def test_volume_to_geoh5(tmp_path: Path):
     )
 
     file = str(tmp_path / f"{__name__}.geoh5")
-    omf.OMFWriter(vol, file)
+    omf.GeoH5Writer(vol, file)
 
     with Workspace(file) as workspace:
         block_model = workspace.get_entity("vol")[0]
@@ -131,7 +131,7 @@ def test_volume_flip_origin_z(tmp_path):
     )
 
     file = str(tmp_path / f"{__name__}.geoh5")
-    omf.OMFWriter(vol, file)
+    omf.GeoH5Writer(vol, file)
 
     with Workspace(file) as workspace:
         block_model = workspace.get_entity("vol")[0]

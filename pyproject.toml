@@ -73,9 +73,9 @@ standard-imghdr = "3.13.*"
 
 ## dependencies from Git repositories
 #------------------------------------
-#geoh5py = {version = ">=0.14.0a, 0.14.*", allow-prereleases = true}
+# geoh5py = {version = ">=0.14.0a, 0.14.*", allow-prereleases = true}
 geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-#geoh5py = {path = "../geoh5py", develop = true}
+# geoh5py = {path = "../geoh5py", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 Pygments = "*"
