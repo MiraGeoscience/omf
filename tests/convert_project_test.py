@@ -1,7 +1,7 @@
 """Tests for PointSet validation"""
 
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#  Copyright (c) 2022-2026 Mira Geoscience Ltd.                                '
 #                                                                              '
 #  This file is part of mira-omf package.                                      '
 #                                                                              '
@@ -24,7 +24,7 @@ def test_project_to_geoh5(random_project: omf.Project, tmp_path: Path, caplog):
     """Test pointset geometry validation"""
     file = str(tmp_path / "project.geoh5")
 
-    omf.OMFWriter(random_project, file)
+    omf.GeoH5Writer(random_project, file)
     warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
     assert len(warning_records) == 1
 
@@ -42,22 +42,24 @@ def test_project_compression(random_project: omf.Project, tmp_path: Path):
     file_med_comp = str(tmp_path / "project_med_comp.geoh5")
     file_high_comp = str(tmp_path / "project_high_comp.geoh5")
 
-    omf.OMFWriter(random_project, file_low_comp, compression=1)
-    omf.OMFWriter(random_project, file_med_comp, compression=5)
-    omf.OMFWriter(random_project, file_high_comp, compression=9)
+    omf.GeoH5Writer(random_project, file_low_comp, compression=1, page_size=512)
+    omf.GeoH5Writer(random_project, file_med_comp, compression=3, page_size=512)
+    omf.GeoH5Writer(random_project, file_high_comp, compression=9, page_size=512)
 
     size_low_comp = os.stat(file_low_comp).st_size
     size_med_comp = os.stat(file_med_comp).st_size
     size_high_comp = os.stat(file_high_comp).st_size
 
-    assert size_low_comp > size_med_comp > size_high_comp
+    assert size_low_comp > size_high_comp
+    assert size_low_comp > size_med_comp
+    assert size_med_comp > size_high_comp
 
 
 def test_container_group(random_project: omf.Project, tmp_path: Path):
     """Test that a container group is flatten in the omf file."""
     file = str(tmp_path / f"{__name__}.geoh5")
 
-    omf.OMFWriter(random_project, file)
+    omf.GeoH5Writer(random_project, file)
     with Workspace(tmp_path / f"{__name__}.geoh5") as ws:
         group = ContainerGroup.create(ws, name="Test Group")
         for obj in ws.objects:

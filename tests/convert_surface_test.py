@@ -1,7 +1,7 @@
 """Tests for PointSet validation"""
 
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#  Copyright (c) 2022-2026 Mira Geoscience Ltd.                                '
 #                                                                              '
 #  This file is part of mira-omf package.                                      '
 #                                                                              '
@@ -37,7 +37,7 @@ def test_surface_to_geoh5(tmp_path: Path):
         color=[100, 200, 200],
     )
     file = str(tmp_path / "surface.geoh5")
-    omf.OMFWriter(surf, file)
+    omf.GeoH5Writer(surf, file)
 
     with Workspace(file) as workspace:
         geoh5_surf = workspace.get_entity("trisurf")[0]

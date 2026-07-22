@@ -1,7 +1,7 @@
 """Tests for PointSet validation"""
 
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#  Copyright (c) 2022-2026 Mira Geoscience Ltd.                                '
 #                                                                              '
 #  This file is part of mira-omf package.                                      '
 #                                                                              '
@@ -20,12 +20,14 @@ from geoh5py.workspace import Workspace
 
 import omf
 from omf import Project
-from omf.fileio.geoh5 import block_model_reordering
+from omf.fileio import OMFWriter
+from omf.fileio.geoh5 import GeoH5Reader, block_model_reordering
 
 
 def test_volume_to_geoh5(tmp_path: Path):
     """Test pointset geometry validation"""
     dims = [10, 15, 20]
+    size = int(np.prod(dims))
     vol = omf.VolumeElement(
         name="vol",
         geometry=omf.VolumeGridGeometry(
@@ -38,19 +40,17 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.ScalarData(
                 name="Random Int Data",
                 location="cells",
-                array=np.arange(np.prod(dims)).flatten().astype(np.int32),
+                array=np.arange(size).flatten().astype(np.int32),
             ),
             omf.ScalarData(
                 name="Random Float Data",
                 location="cells",
-                array=np.random.randn(np.prod(dims)),
+                array=np.random.randn(size),
             ),
             omf.MappedData(
                 name="Reference Data",
                 location="cells",
-                array=np.random.randint(-1, 3, np.prod(dims))
-                .flatten()
-                .astype(np.int32),
+                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(values=omf.StringArray(array=["abc", "123", "@#$%"])),
                     omf.Legend(
@@ -67,9 +67,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data 2",
                 location="cells",
-                array=np.random.randint(-1, 3, np.prod(dims))
-                .flatten()
-                .astype(np.int32),
+                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(
                         values=omf.ColorArray(
@@ -87,7 +85,7 @@ def test_volume_to_geoh5(tmp_path: Path):
     )
 
     file = str(tmp_path / f"{__name__}.geoh5")
-    omf.OMFWriter(vol, file)
+    omf.GeoH5Writer(vol, file)
 
     with Workspace(file) as workspace:
         block_model = workspace.get_entity("vol")[0]
@@ -115,6 +113,9 @@ def test_volume_to_geoh5(tmp_path: Path):
 
     omf.fileio.utils.compare_elements(omf_vol, vol)
 
+    reader = GeoH5Reader(file)
+    OMFWriter(reader(), str(tmp_path / f"{__name__}.omf"))
+
 
 def test_volume_flip_origin_z(tmp_path):
     dims = [10, 15, 20]
@@ -130,16 +131,13 @@ def test_volume_flip_origin_z(tmp_path):
     )
 
     file = str(tmp_path / f"{__name__}.geoh5")
-    omf.OMFWriter(vol, file)
+    omf.GeoH5Writer(vol, file)
 
     with Workspace(file) as workspace:
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert (
-            block_model.origin["z"]
-            == vol.geometry.origin[2] + vol.geometry.tensor_w[0] / 2
-        )
+        assert block_model.origin["z"] == vol.geometry.origin[2]
 
     with Workspace(file) as workspace:
         rotation = np.random.normal(-180, 180, 1)

@@ -1,7 +1,7 @@
 """Tests for PointSet validation"""
 
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#  Copyright (c) 2022-2026 Mira Geoscience Ltd.                                '
 #                                                                              '
 #  This file is part of mira-omf package.                                      '
 #                                                                              '
@@ -47,7 +47,7 @@ def test_pointset_to_geoh5(tmp_path: Path, caplog):
     )
 
     file = str(tmp_path / "pointset.geoh5")
-    omf.OMFWriter(orig_pts, file)
+    omf.GeoH5Writer(orig_pts, file)
 
     # Check that the file was created
     with Workspace(file) as workspace:

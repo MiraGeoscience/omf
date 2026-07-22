@@ -1,5 +1,5 @@
 # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#  Copyright (c) 2025 Mira Geoscience Ltd.                                     '
+#  Copyright (c) 2022-2026 Mira Geoscience Ltd.                                '
 #                                                                              '
 #  This file is part of mira-omf package.                                      '
 #                                                                              '
@@ -39,7 +39,7 @@ def geoh5_input_path_fixture(request, tmp_path_factory) -> Path:
     )
 
     file_path = tmp_path_factory.mktemp("input") / request.param
-    omf.OMFWriter(points, str(file_path))
+    omf.GeoH5Writer(points, str(file_path))
     return file_path
 
 
