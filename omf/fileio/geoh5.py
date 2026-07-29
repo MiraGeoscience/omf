@@ -847,7 +847,7 @@ class ReferenceMapConversion(ArrayConversion):
                         Legend(values=StringArray(array=labels)),
                         Legend(
                             values=ColorArray(
-                                array=element.entity_type.color_map.values[  # type: ignore
+                                array=element.entity_type.color_map.values.T[  # type: ignore
                                     1:-1, ind:
                                 ]
                                 .astype(int)
@@ -922,9 +922,9 @@ class ColormapConversion(ArrayConversion):
             if getattr(element.entity_type, "color_map", None) is not None:
                 cmap = element.entity_type.color_map  # type: ignore
                 ind = np.argsort(cmap.values[0, :])
-                values = cmap.values[0, ind]
+                values = cmap.values.T[0, ind]
                 limits = [values[0], values[-1]]
-                colors = cmap.values[1:-1, ind]  # Drop val and alpha
+                colors = cmap.values.T[1:-1, ind]  # Drop val and alpha
 
                 if colors.shape[1] != 128:
                     new_vals = np.linspace(limits[0], limits[1], 128)
