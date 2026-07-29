@@ -921,10 +921,12 @@ class ColormapConversion(ArrayConversion):
         with fetch_active_workspace(workspace):
             if getattr(element.entity_type, "color_map", None) is not None:
                 cmap = element.entity_type.color_map  # type: ignore
-                ind = np.argsort(cmap.values[0, :])
-                values = cmap.values.T[0, ind]
+
+                array = cmap.values.T
+                ind = np.argsort(array[0, :])
+                values = array[0, ind]
                 limits = [values[0], values[-1]]
-                colors = cmap.values.T[1:-1, ind]  # Drop val and alpha
+                colors = array[1:-1, ind]  # Drop val and alpha
 
                 if colors.shape[1] != 128:
                     new_vals = np.linspace(limits[0], limits[1], 128)
