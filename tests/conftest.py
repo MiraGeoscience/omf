@@ -24,9 +24,9 @@ def random_project() -> omf.Project:
     tests_dir = Path(__file__).resolve().parent
     png_file_path = tests_dir.parent / "docs" / "images" / "PointSetGeometry.png"
     proj = omf.Project(name="Test project", description="Just some assorted elements")
-
-    vertices = np.repeat(np.arange(1000).reshape(-1, 1), 3, axis=1).astype(float)
-    values = np.arange(1000).astype(float)
+    n_values = 5000
+    vertices = np.repeat(np.arange(n_values).reshape(-1, 1), 3, axis=1).astype(float)
+    values = np.arange(n_values).astype(float)
     pts = omf.PointSetElement(
         name="Random Points",
         description="Just random points",
