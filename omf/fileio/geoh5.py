@@ -23,7 +23,6 @@ from typing import Any
 import numpy as np
 from geoh5py.data import (
     Data,
-    DataTypeEnum,
     FloatData,
     GeometricDataConstants,
     IntegerData,
@@ -33,7 +32,8 @@ from geoh5py.data import (
 )
 from geoh5py.groups import ContainerGroup, RootGroup
 from geoh5py.objects import BlockModel, Curve, Grid2D, ObjectBase, Points, Surface
-from geoh5py.shared import FLOAT_NDV, INTEGER_NDV, Entity
+from geoh5py.shared import FLOAT_NDV, INTEGER_NDV, DataTypeEnum
+from geoh5py.shared.entity import Entity
 from geoh5py.shared.utils import DEFAULT_PAGE_SIZE
 from geoh5py.workspace import Workspace
 
@@ -1149,13 +1149,7 @@ class SurfaceGridGeometryConversion(BaseGeometryConversion):
                 geometry["axis_u"] = rot.dot(np.c_[1.0, 0.0, 0.0].T).flatten()
                 geometry["axis_v"] = rot.dot(np.c_[0.0, 1.0, 0.0].T).flatten()
 
-            geometry.update(
-                {
-                    "origin": np.r_[
-                        entity.origin["x"], entity.origin["y"], entity.origin["z"]
-                    ]
-                }
-            )
+            geometry.update({"origin": entity.origin})
             kwargs.update({"geometry": geometry})
         return kwargs
 
@@ -1246,13 +1240,7 @@ class VolumeGridGeometryConversion(BaseGeometryConversion):
             geometry["axis_w"] = np.r_[0, 0, axis[2]]
 
             if hasattr(entity, "origin"):
-                geometry.update(
-                    {
-                        "origin": np.r_[
-                            entity.origin["x"], entity.origin["y"], entity.origin["z"]
-                        ]
-                    }
-                )
+                geometry.update({"origin": entity.origin})
             kwargs.update({"geometry": geometry})
 
         return kwargs

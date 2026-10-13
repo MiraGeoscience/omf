@@ -50,7 +50,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data",
                 location="cells",
-                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
+                array=np.random.randint(0, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(values=omf.StringArray(array=["abc", "123", "@#$%"])),
                     omf.Legend(
@@ -67,7 +67,7 @@ def test_volume_to_geoh5(tmp_path: Path):
             omf.MappedData(
                 name="Reference Data 2",
                 location="cells",
-                array=np.random.randint(-1, 3, size).flatten().astype(np.int32),
+                array=np.random.randint(0, 3, size).flatten().astype(np.int32),
                 legends=[
                     omf.Legend(
                         values=omf.ColorArray(
@@ -137,7 +137,7 @@ def test_volume_flip_origin_z(tmp_path):
         block_model = workspace.get_entity("vol")[0]
 
         assert block_model.z_cell_delimiters[-1] < 0
-        assert block_model.origin["z"] == vol.geometry.origin[2]
+        assert block_model.origin[2] == vol.geometry.origin[2]
 
     with Workspace(file) as workspace:
         rotation = np.random.normal(-180, 180, 1)
