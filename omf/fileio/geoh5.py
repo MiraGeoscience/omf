@@ -115,7 +115,7 @@ class GeoH5Writer:  # pylint: disable=too-few-public-methods
                     element, workspace, compression=self.compression
                 )
 
-            self._entity = converter.from_omf(element)
+            self._entity: Entity = converter.from_omf(element)
 
     def __call__(self):
         return self.entity.workspace
