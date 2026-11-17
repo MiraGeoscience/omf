@@ -22,12 +22,22 @@ license-files = [
 ]
 keywords = ["geology", "geophysics", "earth sciences"]
 readme = "README.rst"
-dynamic = ["version", "dependencies", "classifiers"]
+dynamic = ["version", "classifiers"]
 authors = [
     { name = "Mira Geoscience", email = "support@mirageoscience.com" },
     { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
 ]
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
+
+dependencies = [
+    "numpy>=2.4.0,<2.5.0",
+    "properties>=0.6,<0.7",
+    "pypng==0.20220715.*",
+    "six>=1.16,<2.0",
+    "vectormath>=0.2,<0.3",
+    "standard-imghdr>=3.13,<3.14",
+    "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@GA-9681",
+]
 
 [project.urls]
 repository = "https://github.com/MiraGeoscience/omf"
@@ -37,6 +47,18 @@ homepage = "https://www.mirageoscience.com/mining-industry-software/python-integ
 [project.scripts]
 geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
 omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
+
+[dependency-groups]
+dev = [
+    "Pygments",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "sphinx==5.3.*",
+    "pyyaml",
+    "packaging",
+    "mypy==1.15.0",
+]
 
 [tool.poetry]
 requires-poetry = '>=2.0,<3.0'
@@ -62,29 +84,6 @@ include = [
     { path = "omf/_version.py", format = ["sdist", "wheel"] },
 ]
 version = "0.0.0.dev0"
-
-[tool.poetry.dependencies]
-numpy = "~2.4.0"  # also in geoh5py
-properties = "0.6.*"
-pypng = "^0.20220715"
-six = "^1.16"
-vectormath = "0.2.*"
-standard-imghdr = "3.13.*"
-
-## dependencies from Git repositories
-#------------------------------------
-# geoh5py = {version = ">=0.14.0a, 0.14.*", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-# geoh5py = {path = "../geoh5py", develop = true}
-
-[tool.poetry.group.dev.dependencies]
-Pygments = "*"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-sphinx = "5.3.*"
-pyyaml = '*'
-packaging = '*'
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.9.1,<2.0.0", extras = ["plugin"] }
