@@ -45,7 +45,7 @@ repos:
         files: ^(omf/fileio/geoh5\.py$|omf/scripts/|tests/)
         exclude: ^docs/
 -   repo: https://github.com/codingjoe/relint
-    rev: 3.6.1
+    rev: 3.3.1
     hooks:
     -   id: relint
         args: [-W]  # to fail on warnings
