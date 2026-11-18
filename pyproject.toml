@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-  "poetry-core>=1.8.0",
+  "poetry-core>=2.2.1",
   "poetry-dynamic-versioning>=1.9.1,<2.0",
   # list dependencies to work with PIP_NO_DEPS=1
   "MarkupSafe>=2.0",
@@ -20,14 +20,39 @@ license-files = [
     "LICENSE",
     "THIRD_PARTY_SOFTWARE.rst",
 ]
-keywords = ["geology", "geophysics", "earth sciences"]
+keywords = [
+    "data",
+    "data-format",
+    "data-management",
+    "earth-sciences",
+    "geoh5",
+    "geology",
+    "geophysics",
+    "interoperability",
+    "mining",
+    "omf",
+    "open-mining-format",
+]
 readme = "README.rst"
-dynamic = ["version", "dependencies", "classifiers"]
+dynamic = ["version", "classifiers"]
 authors = [
     { name = "Mira Geoscience", email = "support@mirageoscience.com" },
     { name = "Global Mining Guidelines Group", email = "info@gmggroup.org" }
 ]
 maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience.com" }]
+
+dependencies = [
+    # Mira packages
+    "geoh5py>=0.14.0b1,<0.15.0a.dev",
+    # "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@release/ga-4.9",
+    # other direct dependencies
+    "numpy>=2.4.0,<2.5.0",
+    "properties>=0.6,<0.7",
+    "pypng==0.20220715.*",
+    "six>=1.16,<2.0",
+    "vectormath>=0.2,<0.3",
+    "standard-imghdr>=3.13,<3.14",
+]
 
 [project.urls]
 repository = "https://github.com/MiraGeoscience/omf"
@@ -38,15 +63,30 @@ homepage = "https://www.mirageoscience.com/mining-industry-software/python-integ
 geoh5_to_omf = 'omf.scripts.geoh5_to_omf:main'
 omf_to_geoh5 = 'omf.scripts.omf_to_geoh5:main'
 
+[dependency-groups]
+dev = [
+    "Pygments",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "sphinx==5.3.*",
+    "pyyaml",
+    "packaging",
+    "mypy==1.15.0",
+]
+
 [tool.poetry]
-requires-poetry = '>=2.0,<3.0'
+requires-poetry = '>=2.2.0'
 
 classifiers = [
     'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Mathematics',
     'Topic :: Scientific/Engineering :: Physics',
+    'Topic :: Software Development :: Libraries :: Python Modules',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
     'Operating System :: Unix',
@@ -62,29 +102,6 @@ include = [
     { path = "omf/_version.py", format = ["sdist", "wheel"] },
 ]
 version = "0.0.0.dev0"
-
-[tool.poetry.dependencies]
-numpy = "~2.4.0"  # also in geoh5py
-properties = "0.6.*"
-pypng = "^0.20220715"
-six = "^1.16"
-vectormath = "0.2.*"
-standard-imghdr = "3.13.*"
-
-## dependencies from Git repositories
-#------------------------------------
-# geoh5py = {version = ">=0.14.0a, 0.14.*", allow-prereleases = true}
-geoh5py = {git = "https://github.com/MiraGeoscience/geoh5py.git", rev = "develop"}
-# geoh5py = {path = "../geoh5py", develop = true}
-
-[tool.poetry.group.dev.dependencies]
-Pygments = "*"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-sphinx = "5.3.*"
-pyyaml = '*'
-packaging = '*'
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.9.1,<2.0.0", extras = ["plugin"] }
@@ -198,3 +215,49 @@ fail_under = 80
 [tool.coverage.html]
 skip_empty = true
 skip_covered = true
+
+[tool.pylint.main]
+extension-pkg-allow-list = ["numpy"]
+fail-on = ["F", "E", "W"]
+ignore-paths = [
+    "^omf/fileio/(fileio|utils)[.]py$",
+    "^omf/(base|data|lineset|pointset|serializers|surface|texture|volume)[.]py$",
+]
+jobs = 0
+py-version = "3.9"
+
+[tool.pylint."messages control"]
+disable = [
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "fixme",
+]
+enable = ["c-extension-no-member"]
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "x", "y", "z", "ex", "Run", "id", "_"]
+
+[tool.pylint.classes]
+defining-attr-methods = ["__init__", "__new__", "setUp", "__post_init__"]
+exclude-protected = ["_asdict", "_fields", "_replace", "_source", "_make"]
+valid-metaclass-classmethod-first-arg = "cls"
+
+[tool.pylint.design]
+max-args = 9 # as long as not hitting too-many-positional-arguments
+max-attributes = 16
+max-bool-expr = 6
+max-branches = 13
+max-statements = 65
+min-public-methods = 1
+
+[tool.pylint.imports]
+deprecated-modules = ["optparse", "tkinter.tix"]
