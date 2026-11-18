@@ -36,7 +36,7 @@ dependencies = [
     "six>=1.16,<2.0",
     "vectormath>=0.2,<0.3",
     "standard-imghdr>=3.13,<3.14",
-    "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@GA-9681",
+    "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@release/ga-4.9",
 ]
 
 [project.urls]
