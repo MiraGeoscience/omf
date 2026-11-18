@@ -99,9 +99,6 @@ packages = [
 ]
 
 include = [
-    { path = "LICENSE" },
-    { path = "README.rst" },
-    { path = "THIRD_PARTY_SOFTWARE.rst" },
     { path = "omf/_version.py", format = ["sdist", "wheel"] },
 ]
 version = "0.0.0.dev0"
