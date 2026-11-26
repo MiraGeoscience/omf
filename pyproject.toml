@@ -43,8 +43,8 @@ maintainers = [{ name = "Dominique Fournier", email = "dominiquef@mirageoscience
 
 dependencies = [
     # Mira packages
-    # "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@release/ga-4.9",
-    "geoh5py>=0.14.0b1,==0.14.*",
+    "geoh5py @ git+https://github.com/MiraGeoscience/geoh5py.git@release/ga-4.9",
+    # "geoh5py>=0.14.0b1,==0.14.*",
     # other direct dependencies
     "numpy>=2.4.0,==2.4.*",
     "properties==0.6.*",
